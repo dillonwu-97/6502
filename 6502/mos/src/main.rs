@@ -4,6 +4,27 @@ use std::fs;
 
 // Simple test program to open file, and split the file as bytes into an array of 4 byte chunks 
 
+// interesting, the stack underflows 
+//
+
+//N	Negative
+//V	Overflow
+//-	ignored
+//B	Break
+//D	Decimal (use BCD for arithmetics)
+//I	Interrupt (IRQ disable)
+//Z	Zero
+//C	Carry
+fn emulate() {
+    let pc:u16 = 0;
+    let ac:u8 = 0;
+    let x:u8 = 0;
+    let y:u8 = 0;
+    let sr:u8 = 0;
+    let sp:u8 = 0;
+
+}
+
 fn main() {
     let path = Path::new("./data/pacman");
     let display = path.display();
