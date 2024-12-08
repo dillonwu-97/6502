@@ -32,7 +32,7 @@ struct CPU {
     // TODO: What should the size of this be?
     // TODO: Is each opcode equal to a cycle? I believe so 
     // I feel like I don't really need to keep track of this until later
-    //cycles: u32,
+    // cycles: u32,
 }
 
 impl CPU {
@@ -75,28 +75,58 @@ impl CPU {
         byte 
     }
 
+    // TODO: maybe move this code somewhere else instead?
+    fn lda_set_status(&mut self) {
+        if self.ac == 0 {
+            self.set_status(StatusRegister::Z);
+        }
+        if self.get_status(StatusRegister::V) {
+            self.set_status(StatusRegister::N);
+        }
+    }
+
+
     pub fn execute(&mut self) {
         // Execute an instruction
+        // TODO: separate this into load only? i.e. a section of code that only does load
+        // A giant switch table does not feel right 
+        // Very disorganized; better to separate it out into libraries specific for each type instruction
         let opcode = self.fetch_byte();
         match opcode {
             LDA => { // load immediate opcode
                 let value = self.fetch_byte();
                 self.ac = value;
-                if self.ac == 0 {
-                    self.set_status(StatusRegister::Z);
-                }
-                if self.get_status(StatusRegister::V) {
-                    self.set_status(StatusRegister::N);
-                }
+                self.lda_set_status();
+            }
+            // load the accumulator with the value at the zero page?
+            LDA_ZPG => {
+                let value = self.fetch_byte() + self.x;
+                let deref = self.memory[value as usize];
+                self.ac = deref; 
+                self.lda_set_status();
+            }
+            LDA_ZPX => {
+                let value = self.fetch_byte();
+                let deref = self.memory[value as usize];
+                self.ac = deref;
+                self.lda_set_status();
+            }
+            LDA_ABS => {
+
+            }
+            LDA_ABX => {
+
+            }
+            LDA_ABY => {
+
+            }
+            JSR => {
+
             }
             _   => println!("Instruction not found")
         }
     }
-
-
 }
-
-
 
 fn main() {
     println!("hello world");
