@@ -1,9 +1,9 @@
 //mod opcodes;
 //use opcodes::Opcode;
 use bitflags::bitflags;
-const MEMSIZE: usize = 2 << 16;
+pub(crate) const MEMSIZE: usize = 2 << 16;
 bitflags! {
-    struct  StatusRegister: u8 {
+    pub(crate) struct StatusRegister: u8 {
         const C = 0b0000_0001; // carry
         const Z = 0b0000_0010; // zero
         const I = 0b0000_0100; // interrupt
@@ -53,15 +53,15 @@ impl CPU {
     }
 
     // TODO: should these implementations be somewhere else?
-    fn set_status(&mut self, flag: StatusRegister) {
+    pub(crate) fn set_status(&mut self, flag: StatusRegister) {
         self.sr.insert(flag);
     }
 
-    fn clear_status(&mut self, flag: StatusRegister) {
+    pub(crate) fn clear_status(&mut self, flag: StatusRegister) {
         self.sr.remove(flag);
     }
 
-    fn get_status(&mut self, flag: StatusRegister) -> bool {
+    pub(crate) fn get_status(&mut self, flag: StatusRegister) -> bool {
         self.sr.contains(flag)
     }
 
@@ -74,15 +74,6 @@ impl CPU {
     }
 
     // TODO: maybe move this code somewhere else instead?
-    fn lda_set_status(&mut self) {
-        if self.ac == 0 {
-            self.set_status(StatusRegister::Z);
-        }
-        if self.get_status(StatusRegister::V) {
-            self.set_status(StatusRegister::N);
-        }
-    }
-
 
     pub fn execute(&mut self) {
         // Execute an instruction
