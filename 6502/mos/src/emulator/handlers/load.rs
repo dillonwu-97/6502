@@ -17,7 +17,10 @@ impl CPU {
 
     pub(crate) fn ld_execute(&mut self, opcode: u8) {
         self.ld_acc(opcode); 
+        self.ld_x(opcode);
+        self.ld_y(opcode);
     }
+
 
     pub(crate) fn ld_acc(&mut self, opcode: u8) {
         //println!("ld execute {}", LDA_IMM);
@@ -69,9 +72,40 @@ impl CPU {
             Opcode::LDX_ZPY => {
                 self.x = self.memory[ (self.fetch_byte() + self.y) as usize]
             }
+            Opcode::LDX_ABS => {
+                self.x = self.memory[ self.fetch_two() as usize ];
+            }
+            Opcode::LDX_ABY => {
+                let value = self.fetch_two() + (self.y as u16);
+                self.x = self.memory[value as usize];
+            }
             _ => {}
         }
-        self.ld_set_status(self.ac);
+        self.ld_set_status(self.x);
+    }
+
+    pub(crate) fn ld_y(&mut self, opcode: u8) {
+        let op = Opcode::from(opcode);
+        match op {
+            Opcode::LDY_IMM => {
+                self.y = self.fetch_byte();
+            }
+            Opcode::LDY_ZPG => {
+                self.y = self.memory[self.fetch_byte() as usize]
+            }
+            Opcode::LDY_ZPX => {
+                self.y = self.memory[ (self.fetch_byte() + self.x) as usize]
+            }
+            Opcode::LDY_ABS => {
+                self.y = self.memory[ self.fetch_two() as usize ];
+            }
+            Opcode::LDY_ABX => {
+                let value = self.fetch_two() + (self.x as u16);
+                self.y = self.memory[value as usize];
+            }
+            _ => {}
+        }
+        self.ld_set_status(self.y);
     }
 
 }
