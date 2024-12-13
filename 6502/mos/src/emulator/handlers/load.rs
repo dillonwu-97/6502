@@ -5,24 +5,22 @@ use crate::emulator::Opcode;
 
 impl CPU {
     pub(crate) fn ld_set_status(&mut self, register: u8) {
-        // set status is different based on the register i think 
-        // so we should actually have to pass the register here?
         if register == 0 {
             self.set_status(StatusRegister::Z);
         }
-        if self.get_status(StatusRegister::V) {
+        if register >> 7 == 1 { // check if 7th bit is set
             self.set_status(StatusRegister::N);
         }
     }
 
-    pub(crate) fn ld_execute(&mut self, opcode: u8) {
-        self.ld_acc(opcode); 
-        self.ld_x(opcode);
-        self.ld_y(opcode);
+    // return found opcode or not
+    pub(crate) fn ld_exec(&mut self, opcode: u8) -> bool {
+        // halt after first one returns true
+        return self.ld_acc(opcode) || self.ld_x(opcode) || self.ld_y(opcode);
     }
 
 
-    pub(crate) fn ld_acc(&mut self, opcode: u8) {
+    pub(crate) fn ld_acc(&mut self, opcode: u8) -> bool {
         //println!("ld execute {}", LDA_IMM);
         let op = Opcode::from(opcode);
         match op {
@@ -54,12 +52,15 @@ impl CPU {
             Opcode::LDA_INY => {
 
             }
-            _ => {}
+            _ => {
+                return false;
+            }
         }
         self.ld_set_status(self.ac);
+        true
     }
 
-    pub(crate) fn ld_x(&mut self, opcode: u8) {
+    pub(crate) fn ld_x(&mut self, opcode: u8) -> bool {
         let op = Opcode::from(opcode);
         match op {
             // X register opcodes
@@ -79,12 +80,15 @@ impl CPU {
                 let value = self.fetch_two() + (self.y as u16);
                 self.x = self.memory[value as usize];
             }
-            _ => {}
+            _ => {
+                return false;
+            }
         }
         self.ld_set_status(self.x);
+        true
     }
 
-    pub(crate) fn ld_y(&mut self, opcode: u8) {
+    pub(crate) fn ld_y(&mut self, opcode: u8) -> bool {
         let op = Opcode::from(opcode);
         match op {
             Opcode::LDY_IMM => {
@@ -103,9 +107,11 @@ impl CPU {
                 let value = self.fetch_two() + (self.x as u16);
                 self.y = self.memory[value as usize];
             }
-            _ => {}
+            _ => {
+                return false; 
+            }
         }
         self.ld_set_status(self.y);
+        true
     }
-
 }
