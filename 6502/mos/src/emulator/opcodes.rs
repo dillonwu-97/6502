@@ -50,8 +50,155 @@ pub enum Opcode {
     TXA = 0x8A,
     TXS = 0x9A,
     TYA = 0x98,
-}
 
+    // Stack operations 
+    PHA = 0x48,
+    PHP = 0x08,
+    PLA = 0x68,
+    PLP = 0x28,
+
+    // Logical operations
+    AND_IMM = 0x29,
+    AND_ZPG = 0x25,
+    AND_ZPX = 0x35,
+    AND_ABS = 0x2D,
+    AND_ABX = 0x3D,
+    AND_ABY = 0x39,
+    AND_INX = 0x21,
+    AND_INY = 0x31,
+
+    EOR_IMM = 0x49,
+    EOR_ZPG = 0x45,
+    EOR_ZPX = 0x55,
+    EOR_ABS = 0x4D,
+    EOR_ABX = 0x5D,
+    EOR_ABY = 0x59,
+    EOR_INX = 0x41,
+    EOR_INY = 0x51,
+
+    ORA_IMM = 0x09,
+    ORA_ZPG = 0x05,
+    ORA_ZPX = 0x15,
+    ORA_ABS = 0x0D,
+    ORA_ABX = 0x1D,
+    ORA_ABY = 0x19,
+    ORA_INX = 0x01,
+    ORA_INY = 0x11,
+
+    BIT_ZPG = 0x24,
+    BIT_ABS = 0x2C,
+
+    // Arithmetic operations
+    // Add with carry
+    ADC_IMM = 0x69,
+    ADC_ZPG = 0x65,
+    ADC_ZPX = 0x75,
+    ADC_ABS = 0x6D,
+    ADC_ABX = 0x7D,
+    ADC_ABY = 0x79,
+    ADC_INX = 0x61,
+    ADC_INY = 0x71,
+
+    // subtract with carry
+    SBC_IMM = 0xE9,
+    SBC_ZPG = 0xE5,
+    SBC_ZPX = 0xF5,
+    SBC_ABS = 0xED,
+    SBC_ABX = 0xFD,
+    SBC_ABY = 0xF9,
+    SBC_INX = 0xE1,
+    SBC_INY = 0xF1,
+
+    // cmp 
+    CMP_IMM = 0xC9,
+    CMP_ZPG = 0xC5,
+    CMP_ZPX = 0xD5,
+    CMP_ABS = 0xCD,
+    CMP_ABX = 0xDD,
+    CMP_ABY = 0xD9,
+    CMP_INX = 0xC1,
+    CMP_INY = 0xD1,
+
+    // compare x 
+    CPX_IMM = 0xE0,
+    CPX_ZPG = 0xE4,
+    CPX_ABS = 0xEC,
+
+    // compare y
+    CPY_IMM = 0xC0,
+    CPY_ZPG = 0xC4,
+    CPY_ABS = 0xCC,
+
+    // Increments and Decrements
+    INC_ZPG = 0xE6,
+    INC_ZPX = 0xF6,
+    INC_ABS = 0xEE,
+    INC_ABX = 0xFE,
+
+    INX = 0xE8,
+    INY = 0xC8,
+
+    DEC_ZPG = 0xC6,
+    DEC_ZPX = 0xD6,
+    DEC_ABS = 0xCE,
+    DEC_ABX = 0xDE,
+
+    DEX = 0xCA,
+    DEY = 0x88,
+
+    // Shifts
+    ASL_ACC = 0x0A,
+    ASL_ZPG = 0x06,
+    ASL_ZPX = 0x16,
+    ASL_ABS = 0x0E,
+    ASL_ABX = 0x1E,
+
+    LSR_ACC = 0x4A,
+    LSR_ZPG = 0x46,
+    LSR_ZPX = 0x56,
+    LSR_ABS = 0x4E,
+    LSR_ABX = 0x5E,
+
+    ROL_ACC = 0x4A,
+    ROL_ZPG = 0x46,
+    ROL_ZPX = 0x56,
+    ROL_ABS = 0x4E,
+    ROL_ABX = 0x5E,
+
+    ROR_ACC = 0x6A,
+    ROR_ZPG = 0x66,
+    ROR_ZPX = 0x76,
+    ROR_ABS = 0x6E,
+    ROR_ABX = 0x7E,
+
+    // Jumps and calls
+    JMP_ABS = 0x4C,
+    JMP_IND = 0x6C,
+    JSR_ABS = 0x20,
+    RTS = 0x60,
+
+    // Branches
+    BCC = 0x90,
+    BCS = 0xB0,
+    BEQ = 0xF0,
+    BMI = 0x30,
+    BNE = 0xD0,
+    BPL = 0x10,
+    BVC = 0x50,
+    BVS = 0x70,
+
+    // Status Flag Changes 
+    CLC = 0x18,
+    CLD = 0xD8,
+    CLI = 0x58,
+    CLV = 0xB8,
+    SEC = 0x38,
+    SED = 0xF8,
+    SEI = 0x78,
+    
+
+
+}
 
 impl From<u8> for Opcode {
     fn from(value: u8) -> Self {
@@ -105,6 +252,146 @@ impl From<u8> for Opcode {
             0x8A => Opcode::TXA,
             0x9A => Opcode::TXS,
             0x98 => Opcode::TYA,
+
+            0x48 => Opcode::PHA,
+            0x08 => Opcode::PHP,
+            0x68 => Opcode::PLA,
+            0x28 => Opcode::PLP,
+
+            // Logical operations
+            0x29 => Opcode::AND_IMM,
+            0x25 => Opcode::AND_ZPG,
+            0x35 => Opcode::AND_ZPX,
+            0x2D => Opcode::AND_ABS,
+            0x3D => Opcode::AND_ABX,
+            0x39 => Opcode::AND_ABY,
+            0x21 => Opcode::AND_INX,
+            0x31 => Opcode::AND_INY,
+
+            0x49 => Opcode::EOR_IMM,
+            0x45 => Opcode::EOR_ZPG,
+            0x55 => Opcode::EOR_ZPX,
+            0x4D => Opcode::EOR_ABS,
+            0x5D => Opcode::EOR_ABX,
+            0x59 => Opcode::EOR_ABY,
+            0x41 => Opcode::EOR_INX,
+            0x51 => Opcode::EOR_INY,
+
+            0x09 => Opcode::ORA_IMM,
+            0x05 => Opcode::ORA_ZPG,
+            0x15 => Opcode::ORA_ZPX,
+            0x0D => Opcode::ORA_ABS,
+            0x1D => Opcode::ORA_ABX,
+            0x19 => Opcode::ORA_ABY,
+            0x01 => Opcode::ORA_INX,
+            0x11 => Opcode::ORA_INY,
+
+            0x24 => Opcode::BIT_ZPG,
+            0x2C => Opcode::BIT_ABS,
+
+            0x69 => Opcode::ADC_IMM,
+            0x65 => Opcode::ADC_ZPG,
+            0x75 => Opcode::ADC_ZPX,
+            0x6D => Opcode::ADC_ABS,
+            0x7D => Opcode::ADC_ABX,
+            0x79 => Opcode::ADC_ABY,
+            0x61 => Opcode::ADC_INX,
+            0x71 => Opcode::ADC_INY,
+
+            // subtract with carry
+            0xE9 => Opcode::SBC_IMM,
+            0xE5 => Opcode::SBC_ZPG,
+            0xF5 => Opcode::SBC_ZPX,
+            0xED => Opcode::SBC_ABS,
+            0xFD => Opcode::SBC_ABX,
+            0xF9 => Opcode::SBC_ABY,
+            0xE1 => Opcode::SBC_INX,
+            0xF1 => Opcode::SBC_INY,
+
+            // cmp 
+            0xC9 => Opcode::CMP_IMM,
+            0xC5 => Opcode::CMP_ZPG,
+            0xD5 => Opcode::CMP_ZPX,
+            0xCD => Opcode::CMP_ABS,
+            0xDD => Opcode::CMP_ABX,
+            0xD9 => Opcode::CMP_ABY,
+            0xC1 => Opcode::CMP_INX,
+            0xD1 => Opcode::CMP_INY,
+
+            // compare x 
+            0xE0 => Opcode::CPX_IMM,
+            0xE4 => Opcode::CPX_ZPG,
+            0xEC => Opcode::CPX_ABS,
+
+            // compare y
+            0xC0 => Opcode::CPY_IMM,
+            0xC4 => Opcode::CPY_ZPG,
+            0xCC => Opcode::CPY_ABS,
+
+            // Increments and decrements 
+            0xE6 => Opcode::INC_ZPG,
+            0xF6 => Opcode::INC_ZPX,
+            0xEE => Opcode::INC_ABS,
+            0xFE => Opcode::INC_ABX,
+
+            0xE8 => Opcode::INX,
+            0xC8 => Opcode::INY,
+
+            0xC6 => Opcode::DEC_ZPG,
+            0xD6 => Opcode::DEC_ZPX,
+            0xCE => Opcode::DEC_ABS,
+            0xDE => Opcode::DEC_ABX,
+
+            0xCA => Opcode::DEX,
+            0x88 => Opcode::DEY,
+
+            0x0A => Opcode::ASL_ACC,
+            0x06 => Opcode::ASL_ZPG,
+            0x16 => Opcode::ASL_ZPX,
+            0x0E => Opcode::ASL_ABS,
+            0x1E => Opcode::ASL_ABX,
+              
+            0x4A => Opcode::LSR_ACC,
+            0x46 => Opcode::LSR_ZPG,
+            0x56 => Opcode::LSR_ZPX,
+            0x4E => Opcode::LSR_ABS,
+            0x5E => Opcode::LSR_ABX,
+              
+            0x4A => Opcode::ROL_ACC,
+            0x46 => Opcode::ROL_ZPG,
+            0x56 => Opcode::ROL_ZPX,
+            0x4E => Opcode::ROL_ABS,
+            0x5E => Opcode::ROL_ABX,
+              
+            0x6A => Opcode::ROR_ACC,
+            0x66 => Opcode::ROR_ZPG,
+            0x76 => Opcode::ROR_ZPX,
+            0x6E => Opcode::ROR_ABS,
+            0x7E => Opcode::ROR_ABX,
+
+            // Jumps and calls
+            0x4C => Opcode::JMP_ABS,
+            0x6C => Opcode::JMP_IND,
+            0x20 => Opcode::JSR_ABS,
+            0x60 => Opcode::RTS,
+
+            // Branches
+            0x90 => Opcode::BCC,
+            0xB0 => Opcode::BCS,
+            0xF0 => Opcode::BEQ,
+            0x30 => Opcode::BMI,
+            0xD0 => Opcode::BNE,
+            0x10 => Opcode::BPL,
+            0x50 => Opcode::BVC,
+            0x70 => Opcode::BVS,
+
+            0x18 => Opcode::CLC,
+            0xD8 => Opcode::CLD,
+            0x58 => Opcode::CLI,
+            0xB8 => Opcode::CLV,
+            0x38 => Opcode::SEC,
+            0xF8 => Opcode::SED,
+            0x78 => Opcode::SEI,
 
             _ => panic!("Opcode not found")
         }
