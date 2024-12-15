@@ -196,7 +196,10 @@ pub enum Opcode {
     SED = 0xF8,
     SEI = 0x78,
     
-
+    // System functions
+    BRK = 0x00,
+    NOP = 0xEA,
+    RTI = 0x40,
 
 }
 
@@ -392,6 +395,11 @@ impl From<u8> for Opcode {
             0x38 => Opcode::SEC,
             0xF8 => Opcode::SED,
             0x78 => Opcode::SEI,
+
+            // System functions
+            0x00 => Opcode::BRK,
+            0xEA => Opcode::NOP,
+            0x40 => Opcode::RTI,
 
             _ => panic!("Opcode not found")
         }
