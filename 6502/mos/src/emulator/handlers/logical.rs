@@ -16,7 +16,9 @@ impl CPU {
     }
 
     // Switching between operands
-    pub(crate) fn fetch_operand(&mut self, op: Opcode) -> Option<u8> {
+    // Actually might be better to just move this all into the main CPU file b/c there is a lot of
+    // redundancy in the fetch_byte() function call 
+    fn log_fetch_operand(&mut self, op: Opcode) -> Option<u8> {
         Some(match op {
             Opcode::AND_IMM | Opcode::EOR_IMM | Opcode::ORA_IMM => 
                 self.fetch_byte(),
@@ -40,12 +42,12 @@ impl CPU {
         })
     }
 
-    pub(crate) fn handle_op<F>(&mut self, opcode: u8, operation: F) -> bool 
+    pub(crate) fn log_handle_ops<F>(&mut self, opcode: u8, operation: F) -> bool 
     where 
         F: Fn(u8, u8) -> u8
     {
         let op = Opcode::from(opcode);    
-        if let Some(operand) = self.fetch_operand(op) {
+        if let Some(operand) = self.log_fetch_operand(op) {
             self.ac = operation(self.ac, operand); 
             self.log_set_status(self.ac);
             true
@@ -55,15 +57,15 @@ impl CPU {
     }
 
     pub(crate) fn and_exec(&mut self, opcode: u8) -> bool {
-        self.handle_op(opcode, | a,b | a & b )
+        self.log_handle_ops(opcode, | a,b | a & b )
     }
 
     pub(crate) fn eor_exec(&mut self, opcode: u8) -> bool {
-        self.handle_op(opcode, | a,b | a ^ b )
+        self.log_handle_ops(opcode, | a,b | a ^ b )
     }
 
     pub(crate) fn ora_exec(&mut self, opcode: u8) -> bool {
-        self.handle_op(opcode, | a,b | a | b )
+        self.log_handle_ops(opcode, | a,b | a | b )
     }
 
     pub(crate) fn bit_test(&mut self, opcode: u8) -> bool {
