@@ -1,5 +1,3 @@
-//mod opcodes;
-//use opcodes::Opcode;
 use bitflags::bitflags;
 pub(crate) const MEMSIZE: usize = 2 << 16;
 bitflags! {
@@ -18,14 +16,14 @@ bitflags! {
 pub struct CPU {
 
     pub memory: [u8; MEMSIZE],
-    pc: u16,
-    pub ac: u8, // accumulator
-    x: u8,
-    y: u8,
-    sr: StatusRegister, // bitfield for the status bits
+    pub(crate) pc: u16,
+    pub(crate) ac: u8, // accumulator
+    pub(crate) x: u8,
+    pub(crate) y: u8,
+    pub(crate) sr: StatusRegister, // bitfield for the status bits
     // maybe define some constants and then do the | operation? 
     // not really sure lol 
-    sp: u8,
+    pub(crate) sp: u8,
 
     // TODO: What should the size of this be?
     // TODO: Is each opcode equal to a cycle? I believe so 
@@ -67,54 +65,23 @@ impl CPU {
 
     // grab the bytecode?
     // no need to bee immutable i think 
-    fn fetch_byte(&mut self) -> u8 {
+    pub(crate) fn fetch_byte(&mut self) -> u8 {
         let byte = self.memory[self.pc as usize];
         self.pc += 1;
         byte 
     }
 
+    pub(crate) fn fetch_two(&mut self) -> u16 {
+        let lower = self.fetch_byte() as u16;
+        let upper = self.fetch_byte() as u16;
+        let value = lower + (upper << 8);
+        return value;
+    }
+
     // TODO: maybe move this code somewhere else instead?
-
     pub fn execute(&mut self) {
-        // Execute an instruction
-        // TODO: separate this into load only? i.e. a section of code that only does load
-        // A giant switch table does not feel right 
-        // Very disorganized; better to separate it out into libraries specific for each type instruction
+        // Need to return true / false for everything I think 
         let opcode = self.fetch_byte();
-        match opcode {
-            LDA => { // load immediate opcode
-                let value = self.fetch_byte();
-                self.ac = value;
-                self.lda_set_status();
-            }
-            // load the accumulator with the value at the zero page?
-            LDA_ZPG => {
-                let value = self.fetch_byte() + self.x;
-                let deref = self.memory[value as usize];
-                self.ac = deref; 
-                self.lda_set_status();
-            }
-            LDA_ZPX => {
-                let value = self.fetch_byte();
-                let deref = self.memory[value as usize];
-                self.ac = deref;
-                self.lda_set_status();
-            }
-            LDA_ABS => {
-
-            }
-            LDA_ABX => {
-
-            }
-            LDA_ABY => {
-
-            }
-            JSR => {
-
-            }
-            _   => println!("Instruction not found")
-        }
+        self.ld_exec(opcode) || self.st_exec(opcode) || self.tx_exec(opcode) || self.stack_exec(opcode);
     }
 }
-
-
