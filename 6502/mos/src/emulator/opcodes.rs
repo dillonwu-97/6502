@@ -159,11 +159,11 @@ pub enum Opcode {
     LSR_ABS = 0x4E,
     LSR_ABX = 0x5E,
 
-    ROL_ACC = 0x4A,
-    ROL_ZPG = 0x46,
-    ROL_ZPX = 0x56,
-    ROL_ABS = 0x4E,
-    ROL_ABX = 0x5E,
+    ROL_ACC = 0x2A,
+    ROL_ZPG = 0x26,
+    ROL_ZPX = 0x36,
+    ROL_ABS = 0x2E,
+    ROL_ABX = 0x3E,
 
     ROR_ACC = 0x6A,
     ROR_ZPG = 0x66,
@@ -360,11 +360,11 @@ impl From<u8> for Opcode {
             0x4E => Opcode::LSR_ABS,
             0x5E => Opcode::LSR_ABX,
               
-            0x4A => Opcode::ROL_ACC,
-            0x46 => Opcode::ROL_ZPG,
-            0x56 => Opcode::ROL_ZPX,
-            0x4E => Opcode::ROL_ABS,
-            0x5E => Opcode::ROL_ABX,
+            0x2A => Opcode::ROL_ACC,
+            0x26 => Opcode::ROL_ZPG,
+            0x36 => Opcode::ROL_ZPX,
+            0x2E => Opcode::ROL_ABS,
+            0x3E => Opcode::ROL_ABX,
               
             0x6A => Opcode::ROR_ACC,
             0x66 => Opcode::ROR_ZPG,
