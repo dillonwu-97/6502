@@ -2,7 +2,6 @@ use crate::emulator::CPU;
 use crate::emulator::cpu::StatusRegister;
 use crate::emulator::Opcode;
 
-
 impl CPU {
 
     fn arith_fetch_operand(&mut self, op: Opcode) -> Option<u8> {

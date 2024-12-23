@@ -1,4 +1,3 @@
-mod arithmetic;
 mod load;
 mod logical;
 mod stack;
