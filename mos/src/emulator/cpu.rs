@@ -78,10 +78,41 @@ impl CPU {
         return value;
     }
 
+    /*
+    * TODO: Accumulator addressing mode
+    */
+
+    /*
+    * Immediate addressing mode
+    */
+    pub(crate) fn imm(&mut self) -> u8 {
+        return self.fetch_byte();
+    }
+
+    /*
+    * Zero Page addressing mode
+    */
+    pub(crate) fn zpg(&mut self) -> &mut u8 {
+        return &mut self.memory[ self.fetch_byte() as usize ];
+    }
+
+    /* 
+    * Zero Page, X addressing mode
+    */
+    pub(crate) fn zpx(&mut self) -> &mut u8 {
+        return &mut self.memory [ self.fetch_byte().wrapping_add(self.x as u8) as usize ];
+    }
+
+    pub(crate) fn zpy(&mut self) -> &mut u8 {
+        return &mut self.memory [ self.fetch_byte().wrapping_add( self.y as u8) as usize ]; 
+    }
+    
+
     // TODO: maybe move this code somewhere else instead?
     pub fn execute(&mut self) {
         // Need to return true / false for everything I think 
         let opcode = self.fetch_byte();
         self.ld_exec(opcode) || self.st_exec(opcode) || self.tx_exec(opcode) || self.stack_exec(opcode);
+        // self.ld_exec(opcode);
     }
 }
