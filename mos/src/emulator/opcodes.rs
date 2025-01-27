@@ -1,4 +1,27 @@
+// TODO: maybe there is a better way of organizing / using opcodes
+// TODO this file is A LOT of redundancy; there might be a better way of dealing with this 
+// Might be better instead of enumerating all the opcodes to use an array and store the opcodes in
+// the index so we can index into the array to get the opcode 
+// then afterwards maybe do something like 
+
 #![allow(non_snake_case)]
+
+
+#[derive(PartialEq, Eq)]
+pub enum AddrMode {
+    IMM = 0x00,
+    ZPG = 0x01,
+    ZPX = 0x02,
+    ZPY = 0x03,
+    ABS = 0x04,
+    ABX = 0x05,
+    ABY = 0x06,
+    INX = 0x07,
+    INY = 0x08,
+}
+
+
+#[derive(PartialEq, Eq)]
 pub enum Opcode {
     // load accumulator
     LDA_IMM = 0xA9,  // immediate load accumulator
@@ -406,3 +429,155 @@ impl From<u8> for Opcode {
     } 
 }
 
+impl Opcode {
+    // TODO: is there a better way to do this than using vectors?
+    const IMM_OP:[Opcode; 11] = [
+        Opcode::LDA_IMM,
+        Opcode::LDX_IMM,
+        Opcode::LDY_IMM,
+        Opcode::AND_IMM,
+        Opcode::EOR_IMM,
+        Opcode::ORA_IMM,
+        Opcode::ADC_IMM,
+        Opcode::SBC_IMM,
+        Opcode::CMP_IMM,
+        Opcode::CPX_IMM,
+        Opcode::CPY_IMM
+    ];
+    const ZPG_OP:[Opcode; 20] = [
+        Opcode::LDA_ZPG,
+        Opcode::LDX_ZPG,
+        Opcode::LDY_ZPG,
+        Opcode::STX_ZPG,
+        Opcode::STY_ZPG,
+        Opcode::AND_ZPG,
+        Opcode::EOR_ZPG,
+        Opcode::ORA_ZPG,
+        Opcode::BIT_ZPG,
+        Opcode::ADC_ZPG,
+        Opcode::SBC_ZPG,
+        Opcode::CMP_ZPG,
+        Opcode::CPX_ZPG,
+        Opcode::CPY_ZPG,
+        Opcode::INC_ZPG,
+        Opcode::DEC_ZPG,
+        Opcode::ASL_ZPG,
+        Opcode::LSR_ZPG,
+        Opcode::ROL_ZPG,
+        Opcode::ROR_ZPG,
+    ];
+    const ZPX_OP:[Opcode; 16] = [
+        Opcode::LDA_ZPX,
+        Opcode::LDY_ZPX,
+        Opcode::STA_ZPX,
+        Opcode::STY_ZPX,
+        Opcode::AND_ZPX,
+        Opcode::EOR_ZPX,
+        Opcode::ORA_ZPX,
+        Opcode::ADC_ZPX,
+        Opcode::SBC_ZPX,
+        Opcode::CMP_ZPX,
+        Opcode::INC_ZPX,
+        Opcode::DEC_ZPX,
+        Opcode::ASL_ZPX,
+        Opcode::LSR_ZPX,
+        Opcode::ROL_ZPX,
+        Opcode::ROR_ZPX,
+    ];
+    const ZPY_OP:[Opcode; 2] = [Opcode::LDX_ZPY, Opcode::STX_ZPY];
+    const ABS_OP:[Opcode; 23] = [
+        Opcode::LDA_ABS,
+        Opcode::LDX_ABS,
+        Opcode::LDY_ABS,
+        Opcode::STA_ABS,
+        Opcode::STX_ABS,
+        Opcode::STY_ABS,
+        Opcode::AND_ABS,
+        Opcode::EOR_ABS,
+        Opcode::ORA_ABS,
+        Opcode::BIT_ABS,
+        Opcode::ADC_ABS,
+        Opcode::SBC_ABS,
+        Opcode::CMP_ABS,
+        Opcode::CPX_ABS,
+        Opcode::CPY_ABS,
+        Opcode::INC_ABS,
+        Opcode::DEC_ABS,
+        Opcode::ASL_ABS,
+        Opcode::LSR_ABS,
+        Opcode::ROL_ABS,
+        Opcode::ROR_ABS,
+        Opcode::JMP_ABS,
+        Opcode::JSR_ABS,
+    ];
+    const ABX_OP:[Opcode; 15] = [
+        Opcode::LDA_ABX,
+        Opcode::LDY_ABX,
+        Opcode::STA_ABX,
+        Opcode::AND_ABX,
+        Opcode::EOR_ABX,
+        Opcode::ORA_ABX,
+        Opcode::ADC_ABX,
+        Opcode::SBC_ABX,
+        Opcode::CMP_ABX,
+        Opcode::INC_ABX,
+        Opcode::DEC_ABX,
+        Opcode::ASL_ABX,
+        Opcode::LSR_ABX,
+        Opcode::ROL_ABX,
+        Opcode::ROR_ABX,
+    ];
+    const ABY_OP:[Opcode; 9] = [
+        Opcode::LDA_ABY,
+        Opcode::LDX_ABY,
+        Opcode::STA_ABY,
+        Opcode::AND_ABY,
+        Opcode::EOR_ABY,
+        Opcode::ORA_ABY,
+        Opcode::ADC_ABY,
+        Opcode::SBC_ABY,
+        Opcode::CMP_ABY,
+    ];
+        
+    pub fn get_addr_mode(op: &Opcode) -> Option<AddrMode> {
+
+        match op {
+            x if Self::IMM_OP.contains(x) => Some(AddrMode::IMM),            
+            x if Self::ZPG_OP.contains(x) => Some(AddrMode::ZPG),
+            x if Self::ZPX_OP.contains(x) => Some(AddrMode::ZPX),
+            x if Self::ZPY_OP.contains(x) => Some(AddrMode::ZPY),
+            x if Self::ABS_OP.contains(x) => Some(AddrMode::ABS),
+            x if Self::ABX_OP.contains(x) => Some(AddrMode::ABX),
+            x if Self::ABY_OP.contains(x) => Some(AddrMode::ABY),
+            _ => None
+        }
+    }
+}
+
+// TODO: There is a lo of redundancy in the opcodes; is there a better way to deal with this
+// classification system?
+// impl Opcode {
+//
+
+//
+// ZPG = 0x01,
+//     ZPX = 0x02,
+//     ABS = 0x03,
+//     ABX = 0x04,
+//     ABY = 0x05,
+//     INX = 0x06,
+//     INY = 0x07,
+//
+//     fn get_addressing_mode(&self) -> Option<AddrMode> {
+//         match self {
+//             x if Self::IMM_OP.contains(x) => Some(AddrMode::IMM),        
+//             x if Self::ZP
+//             _ => None
+//         }
+//     }
+//
+// }
+//
+// TODO: 
+// Iterate through each opcode and make sure going from opcode to int and int to opcode gives what
+// we expect
