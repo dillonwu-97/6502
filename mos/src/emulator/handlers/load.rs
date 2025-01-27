@@ -2,9 +2,44 @@
 use crate::emulator::CPU;
 use crate::emulator::cpu::StatusRegister;
 use crate::emulator::Opcode;
+use crate::emulator::AddrMode;
 
 impl CPU {
-    pub(crate) fn ld_set_status(&mut self, register: u8) {
+
+    // TODO: get rid of this to reduce redundancy
+    // TODO add LDA / LDX / LDY / etc. 
+    const LDA_OP:[Opcode; 8] = [
+        Opcode::LDA_IMM,
+        Opcode::LDA_ZPG,
+        Opcode::LDA_ZPX,
+        Opcode::LDA_ABS,
+        Opcode::LDA_ABX,
+        Opcode::LDA_ABY,
+        Opcode::LDA_INX,
+        Opcode::LDA_INY,
+    ];
+
+    const LDX_OP:[Opcode; 5] = [
+        Opcode::LDX_IMM,
+        Opcode::LDX_ZPG,
+        Opcode::LDX_ZPY,
+        Opcode::LDX_ABS,
+        Opcode::LDX_ABY,
+    ];
+
+    const LDY_OP:[Opcode; 5] = [
+        Opcode::LDY_IMM,
+        Opcode::LDY_ZPG,
+        Opcode::LDY_ZPX,
+        Opcode::LDY_ABS,
+        Opcode::LDY_ABX,
+    ];
+
+    pub fn is_ld_opcode(&mut self, op: &Opcode) -> bool {
+        return Self::LDA_OP.contains(op) || Self::LDX_OP.contains(op) || Self::LDY_OP.contains(op);
+    }
+
+    fn ld_set_status(&mut self, register: u8) {
         if register == 0 {
             self.set_status(StatusRegister::Z);
         }
@@ -13,107 +48,33 @@ impl CPU {
         }
     }
 
+    /*
+    * Receive dispatch from the cpu.rs file 
+    */
+    pub fn ld_handle_dispatch(&mut self, op: &Opcode, val: u8) {
+        match op {
+            x if Self::LDA_OP.contains(op) => {
+                self.ac = val;
+                self.ld_set_status(self.ac);
+            }
+            x if Self::LDX_OP.contains(op) => {
+                self.x = val;
+                self.ld_set_status(self.x);
+            }
+            x if Self::LDY_OP.contains(x) => {
+                self.y = val;
+                self.ld_set_status(self.y);
+            }
+            _ => { return; }
+        }
+    }
+
     // return found opcode or not
-    pub(crate) fn ld_exec(&mut self, opcode: u8) -> bool {
-        // halt after first one returns true
-        return self.ld_acc(opcode) || self.ld_x(opcode) || self.ld_y(opcode);
-    }
+    // pub fn ld_exec(&mut self, opcode: u8) -> bool {
+    //     // halt after first one returns true
+    //     return self.ld_acc(opcode) || self.ld_x(opcode) || self.ld_y(opcode);
+    // }
 
-
-    pub(crate) fn ld_acc(&mut self, opcode: u8) -> bool {
-        //println!("ld execute {}", LDA_IMM);
-        let op = Opcode::from(opcode);
-        match op {
-            // load accumulator opcodes
-            Opcode::LDA_IMM => {
-                self.ac = self.fetch_byte();
-            }
-            Opcode::LDA_ZPG => {
-                self.ac = self.memory[ self.fetch_byte() as usize ];
-            }
-            Opcode::LDA_ZPX => {
-                self.ac = self.memory[ (self.fetch_byte() + self.x) as usize ]; 
-            }
-            Opcode::LDA_ABS => {
-                self.ac = self.memory[ self.fetch_two() as usize ];
-            }
-            Opcode::LDA_ABX => {
-                let value = self.fetch_two() + (self.x as u16);
-                self.ac = self.memory[value as usize];
-            }
-            Opcode::LDA_ABY => {
-                let value = self.fetch_two() + (self.y as u16);
-                self.ac = self.memory[value as usize];
-            }
-            Opcode::LDA_INX => {
-                // not yet sure how these work 
-                // too tired to figure it out atm 
-            }
-            Opcode::LDA_INY => {
-
-            }
-            _ => {
-                return false;
-            }
-        }
-        self.ld_set_status(self.ac);
-        true
-    }
-
-    pub(crate) fn ld_x(&mut self, opcode: u8) -> bool {
-        let op = Opcode::from(opcode);
-        match op {
-            // X register opcodes
-            Opcode::LDX_IMM => {
-                self.x = self.fetch_byte();
-            }
-            Opcode::LDX_ZPG => {
-                self.x = self.memory[self.fetch_byte() as usize]
-            }
-            Opcode::LDX_ZPY => {
-                self.x = self.memory[ (self.fetch_byte() + self.y) as usize]
-            }
-            Opcode::LDX_ABS => {
-                self.x = self.memory[ self.fetch_two() as usize ];
-            }
-            Opcode::LDX_ABY => {
-                let value = self.fetch_two() + (self.y as u16);
-                self.x = self.memory[value as usize];
-            }
-            _ => {
-                return false;
-            }
-        }
-        self.ld_set_status(self.x);
-        true
-    }
-
-    pub(crate) fn ld_y(&mut self, opcode: u8) -> bool {
-        let op = Opcode::from(opcode);
-        match op {
-            Opcode::LDY_IMM => {
-                self.y = self.fetch_byte();
-            }
-            Opcode::LDY_ZPG => {
-                self.y = self.memory[self.fetch_byte() as usize]
-            }
-            Opcode::LDY_ZPX => {
-                self.y = self.memory[ (self.fetch_byte() + self.x) as usize]
-            }
-            Opcode::LDY_ABS => {
-                self.y = self.memory[ self.fetch_two() as usize ];
-            }
-            Opcode::LDY_ABX => {
-                let value = self.fetch_two() + (self.x as u16);
-                self.y = self.memory[value as usize];
-            }
-            _ => {
-                return false; 
-            }
-        }
-        self.ld_set_status(self.y);
-        true
-    }
 }
 
 
