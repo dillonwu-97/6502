@@ -1,12 +1,6 @@
-// TODO: maybe there is a better way of organizing / using opcodes
-// TODO this file is A LOT of redundancy; there might be a better way of dealing with this 
-// Might be better instead of enumerating all the opcodes to use an array and store the opcodes in
-// the index so we can index into the array to get the opcode 
-// then afterwards maybe do something like 
-
 #![allow(non_snake_case)]
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Copy, Clone)]
 pub enum OpType {
     LD = 0x00, // load
     ST = 0x01, // store
@@ -23,7 +17,7 @@ pub enum OpType {
     IL = 0x0c, // illegal operation
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Copy, Clone)]
 pub enum AddrMode {
     IMP = 0x00, // implied
     ACC = 0x01, // accumulator
@@ -41,7 +35,7 @@ pub enum AddrMode {
     ILL = 0x0d, // illegal operation
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Copy, Clone)]
 pub enum Opcode {
     BRK_IMP = 0x0,
     ORA_IDX = 0x1,
@@ -460,23 +454,6 @@ impl From<u8> for Opcode {
     } 
 }
 
-impl Opcode {
-    // TODO: is there a better way to do this than using vectors?
-        
-    pub fn get_addr_mode(op: &Opcode) {
-        // match op {
-            // x if Self::IMM_OP.contains(x) => Some(AddrMode::IMM),            
-            // x if Self::ZPG_OP.contains(x) => Some(AddrMode::ZPG),
-            // x if Self::ZPX_OP.contains(x) => Some(AddrMode::ZPX),
-            // x if Self::ZPY_OP.contains(x) => Some(AddrMode::ZPY),
-            // x if Self::ABS_OP.contains(x) => Some(AddrMode::ABS),
-            // x if Self::ABX_OP.contains(x) => Some(AddrMode::ABX),
-            // x if Self::ABY_OP.contains(x) => Some(AddrMode::ABY),
-            // _ => None
-        // }
-    }
-}
-
 struct OpWrapper {
     pub op: Opcode,
     pub addr_mode: AddrMode,
@@ -496,7 +473,7 @@ impl OpWrapper {
 }
 
 struct OpTable  {
-    pub op_table: [Option<OpWrapper>; 256]
+    pub ops: Vec<OpWrapper>
 }
 
 impl OpTable {
@@ -504,20 +481,29 @@ impl OpTable {
      const opcode_arr: [Opcode; 256] = [
         Opcode::BRK_IMP,Opcode::ORA_IDX,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ORA_ZPG,Opcode::ASL_ZPG,Opcode::ILL_OP,Opcode::PHP_IMP,Opcode::ORA_IMM,Opcode::ASL_ACC,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ORA_ABS,Opcode::ASL_ABS,Opcode::ILL_OP,Opcode::BPL_REL,Opcode::ORA_INX,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ORA_ZPX,Opcode::ASL_ZPX,Opcode::ILL_OP,Opcode::CLC_IMP,Opcode::ORA_ABY,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ORA_ABX,Opcode::ASL_ABX,Opcode::ILL_OP,Opcode::JSR_ABS,Opcode::AND_IDX,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::BIT_ZPG,Opcode::AND_ZPG,Opcode::ROL_ZPG,Opcode::ILL_OP,Opcode::PLP_IMP,Opcode::AND_IMM,Opcode::ROL_ACC,Opcode::ILL_OP,Opcode::BIT_ABS,Opcode::AND_ABS,Opcode::ROL_ABS,Opcode::ILL_OP,Opcode::BMI_REL,Opcode::AND_INX,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::AND_ZPX,Opcode::ROL_ZPX,Opcode::ILL_OP,Opcode::SEC_IMP,Opcode::AND_ABY,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::AND_ABX,Opcode::ROL_ABX,Opcode::ILL_OP,Opcode::RTI_IMP,Opcode::EOR_IDX,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::EOR_ZPG,Opcode::LSR_ZPG,Opcode::ILL_OP,Opcode::PHA_IMP,Opcode::EOR_IMM,Opcode::LSR_ACC,Opcode::ILL_OP,Opcode::JMP_ABS,Opcode::EOR_ABS,Opcode::LSR_ABS,Opcode::ILL_OP,Opcode::BVC_REL,Opcode::EOR_INX,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::EOR_ZPX,Opcode::LSR_ZPX,Opcode::ILL_OP,Opcode::CLI_IMP,Opcode::EOR_ABY,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::EOR_ABX,Opcode::LSR_ABX,Opcode::ILL_OP,Opcode::RTS_IMP,Opcode::ADC_IDX,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ADC_ZPG,Opcode::ROR_ZPG,Opcode::ILL_OP,Opcode::PLA_IMP,Opcode::ADC_IMM,Opcode::ROR_ACC,Opcode::ILL_OP,Opcode::JMP_IND,Opcode::ADC_ABS,Opcode::ROR_ABS,Opcode::ILL_OP,Opcode::BVS_REL,Opcode::ADC_INX,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ADC_ZPX,Opcode::ROR_ZPX,Opcode::ILL_OP,Opcode::SEI_IMP,Opcode::ADC_ABY,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ADC_ABX,Opcode::ROR_ABX,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::STA_IDX,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::STY_ZPG,Opcode::STA_ZPG,Opcode::STX_ZPG,Opcode::ILL_OP,Opcode::DEY_IMP,Opcode::ILL_OP,Opcode::TXA_IMP,Opcode::ILL_OP,Opcode::STY_ABS,Opcode::STA_ABS,Opcode::STX_ABS,Opcode::ILL_OP,Opcode::BCC_REL,Opcode::STA_INX,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::STY_ZPX,Opcode::STA_ZPX,Opcode::STX_ZPY,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::STA_ABY,Opcode::TXS_IMP,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::STA_ABX,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::LDY_IMM,Opcode::LDA_IDX,Opcode::LDX_IMM,Opcode::ILL_OP,Opcode::LDY_ZPG,Opcode::LDA_ZPG,Opcode::LDX_ZPG,Opcode::ILL_OP,Opcode::TAY_IMP,Opcode::LDA_IMM,Opcode::TAX_IMP,Opcode::ILL_OP,Opcode::LDY_ABS,Opcode::LDA_ABS,Opcode::LDX_ABS,Opcode::ILL_OP,Opcode::BCS_REL,Opcode::LDA_INX,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::LDY_ZPX,Opcode::LDA_ZPX,Opcode::LDX_ZPY,Opcode::ILL_OP,Opcode::CLV_IMP,Opcode::LDA_ABY,Opcode::TSX_IMP,Opcode::ILL_OP,Opcode::LDY_ABX,Opcode::LDA_ABX,Opcode::LDX_ABY,Opcode::ILL_OP,Opcode::CPY_IMM,Opcode::CMP_IDX,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::CPY_ZPG,Opcode::CMP_ZPG,Opcode::DEC_ZPG,Opcode::ILL_OP,Opcode::INY_IMP,Opcode::CMP_IMM,Opcode::DEX_IMP,Opcode::ILL_OP,Opcode::CPY_ABS,Opcode::CMP_ABS,Opcode::DEC_ABS,Opcode::ILL_OP,Opcode::BNE_REL,Opcode::CMP_INX,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::CMP_ZPX,Opcode::DEC_ZPX,Opcode::ILL_OP,Opcode::CLD_IMP,Opcode::CMP_ABY,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::CMP_ABX,Opcode::DEC_ABX,Opcode::ILL_OP,Opcode::CPX_IMM,Opcode::SBC_IDX,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::CPX_ZPG,Opcode::SBC_ZPG,Opcode::INC_ZPG,Opcode::ILL_OP,Opcode::INX_IMP,Opcode::SBC_IMM,Opcode::NOP_IMP,Opcode::ILL_OP,Opcode::CPX_ABS,Opcode::SBC_ABS,Opcode::INC_ABS,Opcode::ILL_OP,Opcode::BEQ_REL,Opcode::SBC_INX,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::SBC_ZPX,Opcode::INC_ZPX,Opcode::ILL_OP,Opcode::SED_IMP,Opcode::SBC_ABY,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::ILL_OP,Opcode::SBC_ABX,Opcode::INC_ABX,Opcode::ILL_OP,
     ];
-     const addrmode_array: [AddrMode; 256] = [
+     const addrmode_arr: [AddrMode; 256] = [
         AddrMode::IMP,AddrMode::IDX,AddrMode::ILL,AddrMode::ILL,AddrMode::ILL,AddrMode::ZPG,AddrMode::ZPG,AddrMode::ILL,AddrMode::IMP,AddrMode::IMM,AddrMode::ACC,AddrMode::ILL,AddrMode::ILL,AddrMode::ABS,AddrMode::ABS,AddrMode::ILL,AddrMode::REL,AddrMode::INX,AddrMode::ILL,AddrMode::ILL,AddrMode::ILL,AddrMode::ZPX,AddrMode::ZPX,AddrMode::ILL,AddrMode::IMP,AddrMode::ABY,AddrMode::ILL,AddrMode::ILL,AddrMode::ILL,AddrMode::ABX,AddrMode::ABX,AddrMode::ILL,AddrMode::ABS,AddrMode::IDX,AddrMode::ILL,AddrMode::ILL,AddrMode::ZPG,AddrMode::ZPG,AddrMode::ZPG,AddrMode::ILL,AddrMode::IMP,AddrMode::IMM,AddrMode::ACC,AddrMode::ILL,AddrMode::ABS,AddrMode::ABS,AddrMode::ABS,AddrMode::ILL,AddrMode::REL,AddrMode::INX,AddrMode::ILL,AddrMode::ILL,AddrMode::ILL,AddrMode::ZPX,AddrMode::ZPX,AddrMode::ILL,AddrMode::IMP,AddrMode::ABY,AddrMode::ILL,AddrMode::ILL,AddrMode::ILL,AddrMode::ABX,AddrMode::ABX,AddrMode::ILL,AddrMode::IMP,AddrMode::IDX,AddrMode::ILL,AddrMode::ILL,AddrMode::ILL,AddrMode::ZPG,AddrMode::ZPG,AddrMode::ILL,AddrMode::IMP,AddrMode::IMM,AddrMode::ACC,AddrMode::ILL,AddrMode::ABS,AddrMode::ABS,AddrMode::ABS,AddrMode::ILL,AddrMode::REL,AddrMode::INX,AddrMode::ILL,AddrMode::ILL,AddrMode::ILL,AddrMode::ZPX,AddrMode::ZPX,AddrMode::ILL,AddrMode::IMP,AddrMode::ABY,AddrMode::ILL,AddrMode::ILL,AddrMode::ILL,AddrMode::ABX,AddrMode::ABX,AddrMode::ILL,AddrMode::IMP,AddrMode::IDX,AddrMode::ILL,AddrMode::ILL,AddrMode::ILL,AddrMode::ZPG,AddrMode::ZPG,AddrMode::ILL,AddrMode::IMP,AddrMode::IMM,AddrMode::ACC,AddrMode::ILL,AddrMode::IND,AddrMode::ABS,AddrMode::ABS,AddrMode::ILL,AddrMode::REL,AddrMode::INX,AddrMode::ILL,AddrMode::ILL,AddrMode::ILL,AddrMode::ZPX,AddrMode::ZPX,AddrMode::ILL,AddrMode::IMP,AddrMode::ABY,AddrMode::ILL,AddrMode::ILL,AddrMode::ILL,AddrMode::ABX,AddrMode::ABX,AddrMode::ILL,AddrMode::ILL,AddrMode::IDX,AddrMode::ILL,AddrMode::ILL,AddrMode::ZPG,AddrMode::ZPG,AddrMode::ZPG,AddrMode::ILL,AddrMode::IMP,AddrMode::ILL,AddrMode::IMP,AddrMode::ILL,AddrMode::ABS,AddrMode::ABS,AddrMode::ABS,AddrMode::ILL,AddrMode::REL,AddrMode::INX,AddrMode::ILL,AddrMode::ILL,AddrMode::ZPX,AddrMode::ZPX,AddrMode::ZPY,AddrMode::ILL,AddrMode::ILL,AddrMode::ABY,AddrMode::IMP,AddrMode::ILL,AddrMode::ILL,AddrMode::ABX,AddrMode::ILL,AddrMode::ILL,AddrMode::IMM,AddrMode::IDX,AddrMode::IMM,AddrMode::ILL,AddrMode::ZPG,AddrMode::ZPG,AddrMode::ZPG,AddrMode::ILL,AddrMode::IMP,AddrMode::IMM,AddrMode::IMP,AddrMode::ILL,AddrMode::ABS,AddrMode::ABS,AddrMode::ABS,AddrMode::ILL,AddrMode::REL,AddrMode::INX,AddrMode::ILL,AddrMode::ILL,AddrMode::ZPX,AddrMode::ZPX,AddrMode::ZPY,AddrMode::ILL,AddrMode::IMP,AddrMode::ABY,AddrMode::IMP,AddrMode::ILL,AddrMode::ABX,AddrMode::ABX,AddrMode::ABY,AddrMode::ILL,AddrMode::IMM,AddrMode::IDX,AddrMode::ILL,AddrMode::ILL,AddrMode::ZPG,AddrMode::ZPG,AddrMode::ZPG,AddrMode::ILL,AddrMode::IMP,AddrMode::IMM,AddrMode::IMP,AddrMode::ILL,AddrMode::ABS,AddrMode::ABS,AddrMode::ABS,AddrMode::ILL,AddrMode::REL,AddrMode::INX,AddrMode::ILL,AddrMode::ILL,AddrMode::ILL,AddrMode::ZPX,AddrMode::ZPX,AddrMode::ILL,AddrMode::IMP,AddrMode::ABY,AddrMode::ILL,AddrMode::ILL,AddrMode::ILL,AddrMode::ABX,AddrMode::ABX,AddrMode::ILL,AddrMode::IMM,AddrMode::IDX,AddrMode::ILL,AddrMode::ILL,AddrMode::ZPG,AddrMode::ZPG,AddrMode::ZPG,AddrMode::ILL,AddrMode::IMP,AddrMode::IMM,AddrMode::IMP,AddrMode::ILL,AddrMode::ABS,AddrMode::ABS,AddrMode::ABS,AddrMode::ILL,AddrMode::REL,AddrMode::INX,AddrMode::ILL,AddrMode::ILL,AddrMode::ILL,AddrMode::ZPX,AddrMode::ZPX,AddrMode::ILL,AddrMode::IMP,AddrMode::ABY,AddrMode::ILL,AddrMode::ILL,AddrMode::ILL,AddrMode::ABX,AddrMode::ABX,AddrMode::ILL,
     ];
-    const cycle_array: [u8; 256] = [
+    const cycle_arr: [u8; 256] = [
         1,2,0,0,0,2,2,0,1,2,1,0,0,3,3,0,2,2,0,0,0,2,2,0,1,3,0,0,0,3,3,0,3,2,0,0,2,2,2,0,1,2,1,0,3,3,3,0,2,2,0,0,0,2,2,0,1,3,0,0,0,3,3,0,1,2,0,0,0,2,2,0,1,2,1,0,3,3,3,0,2,2,0,0,0,2,2,0,1,3,0,0,0,3,3,0,1,2,0,0,0,2,2,0,1,2,1,0,3,3,3,0,2,2,0,0,0,2,2,0,1,3,0,0,0,3,3,0,0,2,0,0,2,2,2,0,1,0,1,0,3,3,3,0,2,2,0,0,2,2,2,0,0,3,1,0,0,3,0,0,2,2,2,0,2,2,2,0,1,2,1,0,3,3,3,0,2,2,0,0,2,2,2,0,1,3,1,0,3,3,3,0,2,2,0,0,2,2,2,0,1,2,1,0,3,3,3,0,2,2,0,0,0,2,2,0,1,3,0,0,0,3,3,0,2,2,0,0,2,2,2,0,1,2,1,0,3,3,3,0,2,2,0,0,0,2,2,0,1,3,0,0,0,3,3,0,
     ];
-
-    const optype_array: [OpType; 256] = [
+    const optype_arr: [OpType; 256] = [
         OpType::SY,OpType::LO,OpType::IL,OpType::IL,OpType::IL,OpType::LO,OpType::SH,OpType::IL,OpType::SK,OpType::LO,OpType::SH,OpType::IL,OpType::IL,OpType::LO,OpType::SH,OpType::IL,OpType::BR,OpType::LO,OpType::IL,OpType::IL,OpType::IL,OpType::LO,OpType::SH,OpType::IL,OpType::SF,OpType::LO,OpType::IL,OpType::IL,OpType::IL,OpType::LO,OpType::SH,OpType::IL,OpType::JP,OpType::LO,OpType::IL,OpType::IL,OpType::LO,OpType::LO,OpType::SH,OpType::IL,OpType::SK,OpType::LO,OpType::SH,OpType::IL,OpType::LO,OpType::LO,OpType::SH,OpType::IL,OpType::BR,OpType::LO,OpType::IL,OpType::IL,OpType::IL,OpType::LO,OpType::SH,OpType::IL,OpType::SF,OpType::LO,OpType::IL,OpType::IL,OpType::IL,OpType::LO,OpType::SH,OpType::IL,OpType::SY,OpType::LO,OpType::IL,OpType::IL,OpType::IL,OpType::LO,OpType::SH,OpType::IL,OpType::SK,OpType::LO,OpType::SH,OpType::IL,OpType::JP,OpType::LO,OpType::SH,OpType::IL,OpType::BR,OpType::LO,OpType::IL,OpType::IL,OpType::IL,OpType::LO,OpType::SH,OpType::IL,OpType::SF,OpType::LO,OpType::IL,OpType::IL,OpType::IL,OpType::LO,OpType::SH,OpType::IL,OpType::JP,OpType::AR,OpType::IL,OpType::IL,OpType::IL,OpType::AR,OpType::SH,OpType::IL,OpType::SK,OpType::AR,OpType::SH,OpType::IL,OpType::JP,OpType::AR,OpType::SH,OpType::IL,OpType::BR,OpType::AR,OpType::IL,OpType::IL,OpType::IL,OpType::AR,OpType::SH,OpType::IL,OpType::SF,OpType::AR,OpType::IL,OpType::IL,OpType::IL,OpType::AR,OpType::SH,OpType::IL,OpType::IL,OpType::ST,OpType::IL,OpType::IL,OpType::ST,OpType::ST,OpType::ST,OpType::IL,OpType::ID,OpType::IL,OpType::TX,OpType::IL,OpType::ST,OpType::ST,OpType::ST,OpType::IL,OpType::BR,OpType::ST,OpType::IL,OpType::IL,OpType::ST,OpType::ST,OpType::ST,OpType::IL,OpType::IL,OpType::ST,OpType::SK,OpType::IL,OpType::IL,OpType::ST,OpType::IL,OpType::IL,OpType::LD,OpType::LD,OpType::LD,OpType::IL,OpType::LD,OpType::LD,OpType::LD,OpType::IL,OpType::TX,OpType::LD,OpType::TX,OpType::IL,OpType::LD,OpType::LD,OpType::LD,OpType::IL,OpType::BR,OpType::LD,OpType::IL,OpType::IL,OpType::LD,OpType::LD,OpType::LD,OpType::IL,OpType::SF,OpType::LD,OpType::SK,OpType::IL,OpType::LD,OpType::LD,OpType::LD,OpType::IL,OpType::AR,OpType::AR,OpType::IL,OpType::IL,OpType::AR,OpType::AR,OpType::ID,OpType::IL,OpType::ID,OpType::AR,OpType::ID,OpType::IL,OpType::AR,OpType::AR,OpType::ID,OpType::IL,OpType::BR,OpType::AR,OpType::IL,OpType::IL,OpType::IL,OpType::AR,OpType::ID,OpType::IL,OpType::SF,OpType::AR,OpType::IL,OpType::IL,OpType::IL,OpType::AR,OpType::ID,OpType::IL,OpType::AR,OpType::AR,OpType::IL,OpType::IL,OpType::AR,OpType::AR,OpType::ID,OpType::IL,OpType::ID,OpType::AR,OpType::SY,OpType::IL,OpType::AR,OpType::AR,OpType::ID,OpType::IL,OpType::BR,OpType::AR,OpType::IL,OpType::IL,OpType::IL,OpType::AR,OpType::ID,OpType::IL,OpType::SF,OpType::AR,OpType::IL,OpType::IL,OpType::IL,OpType::AR,OpType::ID,OpType::IL,
     ];
 
-    pub fn new(op_table: [Option<OpWrapper>; 256]) -> Self {
+    pub fn new() -> Self {
+        let mut op_vec: Vec<OpWrapper> = Vec::with_capacity(256);
+        for i in 0..256 {
+            let new_wrapper: OpWrapper = OpWrapper::new(
+                Self::opcode_arr[i],
+                Self::addrmode_arr[i],
+                Self::cycle_arr[i],
+                Self::optype_arr[i]
+            );
+            op_vec.push(new_wrapper);
+        }
         Self {
-            op_table: op_table
+            ops: op_vec
         }
     }
 }
