@@ -3,40 +3,15 @@ use crate::emulator::CPU;
 use crate::emulator::cpu::StatusRegister;
 use crate::emulator::Opcode;
 use crate::emulator::AddrMode;
+use crate::emulator::Inst;
 
 impl CPU {
 
     // TODO: get rid of this to reduce redundancy
     // TODO add LDA / LDX / LDY / etc. 
-    const LDA_OP:[Opcode; 8] = [
-        Opcode::LDA_IMM,
-        Opcode::LDA_ZPG,
-        Opcode::LDA_ZPX,
-        Opcode::LDA_ABS,
-        Opcode::LDA_ABX,
-        Opcode::LDA_ABY,
-        Opcode::LDA_INX,
-        Opcode::LDA_INY,
-    ];
+    
+    pub fn is_ld_opcode(&mut self, op: Opcode) {
 
-    const LDX_OP:[Opcode; 5] = [
-        Opcode::LDX_IMM,
-        Opcode::LDX_ZPG,
-        Opcode::LDX_ZPY,
-        Opcode::LDX_ABS,
-        Opcode::LDX_ABY,
-    ];
-
-    const LDY_OP:[Opcode; 5] = [
-        Opcode::LDY_IMM,
-        Opcode::LDY_ZPG,
-        Opcode::LDY_ZPX,
-        Opcode::LDY_ABS,
-        Opcode::LDY_ABX,
-    ];
-
-    pub fn is_ld_opcode(&mut self, op: &Opcode) -> bool {
-        return Self::LDA_OP.contains(op) || Self::LDX_OP.contains(op) || Self::LDY_OP.contains(op);
     }
 
     fn ld_set_status(&mut self, register: u8) {
@@ -48,33 +23,23 @@ impl CPU {
         }
     }
 
-    /*
-    * Receive dispatch from the cpu.rs file 
-    */
-    pub fn ld_handle_dispatch(&mut self, op: &Opcode, val: u8) {
-        match op {
-            x if Self::LDA_OP.contains(op) => {
-                self.ac = val;
+    pub fn ld(&mut self, inst: Inst, val: u8) {
+        match inst {
+            Inst::LDA => {
+                self.ac = val; 
                 self.ld_set_status(self.ac);
             }
-            x if Self::LDX_OP.contains(op) => {
+            Inst::LDX => {
                 self.x = val;
                 self.ld_set_status(self.x);
             }
-            x if Self::LDY_OP.contains(x) => {
-                self.y = val;
+            Inst::LDY => {
+                self.x = val;
                 self.ld_set_status(self.y);
             }
-            _ => { return; }
+            _ => {return;}
         }
     }
-
-    // return found opcode or not
-    // pub fn ld_exec(&mut self, opcode: u8) -> bool {
-    //     // halt after first one returns true
-    //     return self.ld_acc(opcode) || self.ld_x(opcode) || self.ld_y(opcode);
-    // }
-
 }
 
 
