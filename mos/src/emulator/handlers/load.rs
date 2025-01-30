@@ -1,4 +1,7 @@
 #![allow(non_snake_case)]
+#[cfg(test)]
+#[path = "load.test.rs"]
+mod tests;
 use crate::emulator::CPU;
 use crate::emulator::cpu::StatusRegister;
 use crate::emulator::Opcode;
@@ -34,28 +37,10 @@ impl CPU {
                 self.ld_set_status(self.x);
             }
             Inst::LDY => {
-                self.x = val;
+                self.y = val;
                 self.ld_set_status(self.y);
             }
             _ => {return;}
         }
-    }
-}
-
-
-#[cfg(test)]
-mod test {
-    #[test]
-    fn test_lda() {
-        // why do I need use here when it's already declared at the top? v confused
-        use super::CPU;
-        use crate::emulator::Opcode;
-        let mut cpu = CPU::new();
-        cpu.reset();
-        let op: u8 = Opcode::LDA_IMM as u8;
-        cpu.memory[0x0] = op;
-        cpu.memory[0x1] = 0x41;
-        cpu.execute();
-        assert_eq!(cpu.ac, 0x41);
     }
 }
