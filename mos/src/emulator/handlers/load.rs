@@ -10,13 +10,6 @@ use crate::emulator::Inst;
 
 impl CPU {
 
-    // TODO: get rid of this to reduce redundancy
-    // TODO add LDA / LDX / LDY / etc. 
-    
-    pub fn is_ld_opcode(&mut self, op: Opcode) {
-
-    }
-
     fn ld_set_status(&mut self, register: u8) {
         if register == 0 {
             self.set_status(StatusRegister::Z);

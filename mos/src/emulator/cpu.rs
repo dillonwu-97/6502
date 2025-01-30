@@ -61,8 +61,6 @@ impl CPU {
             memory: [0; MEMSIZE],
             optable: op_vec 
         }
-
-            
     }
     
     pub fn reset(&mut self) {
@@ -114,8 +112,10 @@ impl CPU {
     /*
     * Immediate addressing mode
     */
-    pub fn imm(&mut self) -> u8 {
-        return self.fetch_byte();
+    pub fn imm(&mut self) -> &mut u8 {
+        let ret = &mut self.memory[ self.pc as usize ];
+        self.pc += 1;
+        return ret;
     }
 
     /*
@@ -152,12 +152,12 @@ impl CPU {
     }
 
     pub fn abx(&mut self) -> &mut u8 {
-        let val = self.fetch_two() + (self.x as u16);
+        let val = self.fetch_two().wrapping_add(self.x as u16);
         return &mut self.memory[ val as usize ];
     }
 
     pub fn aby(&mut self) -> &mut u8 {
-        let val = self.fetch_two() + (self.y as u16);
+        let val = self.fetch_two().wrapping_add(self.y as u16);
         return &mut self.memory[ val as usize ];
     }
 
@@ -166,6 +166,7 @@ impl CPU {
     // This is only used for jumps instructions. The returned value is the lower
     // byte of the jump address
     // The next byte afterwards is the upper byte of the jump address
+    // TODO: check the pc count for this
     pub fn ind(&mut self) -> &mut u8 {
         let lower = self.fetch_byte() as u16;   
         let upper = self.fetch_byte() as u16;
@@ -176,21 +177,25 @@ impl CPU {
     // TODO: edge case: both memory locations (upper / lower) specifying the high and low order
     // bytes of the effective address must be in page zero 
     // e.g. zp_addr = 0xff
+    // TODO: add a test case that handles the edge case
+    // need to fix this
     pub fn idx(&mut self) -> &mut u8 {
         let zp_addr = self.fetch_byte().wrapping_add(self.x);  // zero page addr
-        debug_assert!(zp_addr < 0xff); // load 0xfe, then load 0xff 
-        let lower = self.fetch_byte() as u16;
-        let upper = self.fetch_byte() as u16;
-        return &mut self.memory[ zp_addr as usize ];
+        let lower = self.memory[ zp_addr as usize ] as u16;
+        let upper = self.memory[ zp_addr.wrapping_add(0x1) as usize ] as u16;
+        let addr = (upper << 0x8) + lower;
+        return &mut self.memory[ addr as usize ];
     }
     
     /*
     * https://stackoverflow.com/questions/46262435/indirect-y-indexed-addressing-mode-in-mos-6502
+    * TODO: if wrapping_add then cycle count goes up by 1 probs
     */
     pub fn idy(&mut self) -> &mut u8 {
-        let zp_addr = self.fetch_byte();
-        let lower = (self.memory[ zp_addr as usize ] as u16) + (self.y as u16);
-        let mut upper: u16 = self.fetch_byte() as u16; // what happens if 0xff is 
+        let zpg_addr = self.fetch_byte() as u16;
+        let mut lower = self.memory[ zpg_addr as usize ] as u16;
+        let mut upper = self.memory[ zpg_addr.wrapping_add(0x01) as usize ] as u16;
+        lower += self.y as u16;
         if (lower > 0xff) {
             upper += 0x1;  
             upper &= 0xff; // in case there is an overflow
@@ -207,6 +212,7 @@ impl CPU {
         let idx = op;
         let addr_mode = self.optable[op as usize].addr_mode;
         match addr_mode {
+            a if a == AddrMode::IMM => self.imm(),
             a if a == AddrMode::ZPG => self.zpg(),
             a if a == AddrMode::ZPX => self.zpx(),
             a if a == AddrMode::ZPY => self.zpy(),
@@ -227,11 +233,9 @@ impl CPU {
                 let mem_val = *mem_ref;
                 self.ld(cur, mem_val);
             }
-
             _ => {return; }
         }
     }
-
 
     // TODO: maybe move this code somewhere else instead?
     pub fn execute(&mut self) {
