@@ -1,6 +1,14 @@
 use bitflags::bitflags;
 use crate::emulator::Opcode;
 use crate::emulator::AddrMode;
+use crate::emulator::Inst;
+use crate::emulator::OpWrapper;
+
+// TODO: is there a different way to using all these different functions in the same module?
+use crate::emulator::inst_arr;
+use crate::emulator::cycle_arr;
+use crate::emulator::addrmode_arr;
+use crate::emulator::opcode_arr;
 
 // I wonder if there is a better way to do this or nah 
 pub const MEMSIZE: usize = 2 << 16;
@@ -28,6 +36,7 @@ pub struct CPU {
     // maybe define some constants and then do the | operation? 
     // not really sure lol 
     pub sp: u8,
+    pub optable: Vec<OpWrapper>,
 
     // TODO: What should the size of this be?
     // TODO: Is each opcode equal to a cycle? I believe so 
@@ -37,10 +46,23 @@ pub struct CPU {
 
 impl CPU {
     pub fn new() -> Self {
-        Self {
-            pc: 0, ac: 0, x: 0, y: 0, sr: StatusRegister::empty(), sp: 0xff   , 
-            memory: [0; MEMSIZE],
+        let mut op_vec: Vec<OpWrapper> = Vec::with_capacity(256);
+        for i in 0..256 {
+            let new_wrapper: OpWrapper = OpWrapper::new(
+                opcode_arr[i],
+                addrmode_arr[i],
+                cycle_arr[i],
+                inst_arr[i]
+            );
+            op_vec.push(new_wrapper);
         }
+        Self {
+            pc: 0, ac: 0, x: 0, y: 0, sr: StatusRegister::empty(), sp: 0xff, 
+            memory: [0; MEMSIZE],
+            optable: op_vec 
+        }
+
+            
     }
     
     pub fn reset(&mut self) {
@@ -82,8 +104,11 @@ impl CPU {
         return value;
     }
 
+    // All addressing mode functions should be returning some memory address to be used
+    // Branch instructions are all relative so REL is not handled
+    
     /*
-    * TODO: Accumulator addressing mode
+    * Addressing mode functions should be grabbing that which we are reading from / writing to
     */
 
     /*
@@ -94,7 +119,18 @@ impl CPU {
     }
 
     /*
+    * Operates directly on the accumulator 
+    *
+    * Four instructions that operate in this mode: ASL, ROL, LSR, ROR
+    */
+    pub fn acc(&mut self) -> &mut u8 {
+        return &mut self.ac 
+    }
+
+    /*
     * Zero Page addressing mode
+    *
+    * Returns reference to memory 
     */
     pub fn zpg(&mut self) -> &mut u8 {
         return &mut self.memory[ self.fetch_byte() as usize ];
@@ -125,27 +161,73 @@ impl CPU {
         return &mut self.memory[ val as usize ];
     }
 
+    // Absolute indirect
+    //
+    // This is only used for jumps instructions. The returned value is the lower
+    // byte of the jump address
+    // The next byte afterwards is the upper byte of the jump address
+    pub fn ind(&mut self) -> &mut u8 {
+        let lower = self.fetch_byte() as u16;   
+        let upper = self.fetch_byte() as u16;
+        let jmp_addr = lower + (upper << 8);
+        return &mut self.memory[ jmp_addr as usize ];
+    }
+
+    // TODO: edge case: both memory locations (upper / lower) specifying the high and low order
+    // bytes of the effective address must be in page zero 
+    // e.g. zp_addr = 0xff
+    pub fn idx(&mut self) -> &mut u8 {
+        let zp_addr = self.fetch_byte().wrapping_add(self.x);  // zero page addr
+        debug_assert!(zp_addr < 0xff); // load 0xfe, then load 0xff 
+        let lower = self.fetch_byte() as u16;
+        let upper = self.fetch_byte() as u16;
+        return &mut self.memory[ zp_addr as usize ];
+    }
+    
+    /*
+    * https://stackoverflow.com/questions/46262435/indirect-y-indexed-addressing-mode-in-mos-6502
+    */
+    pub fn idy(&mut self) -> &mut u8 {
+        let zp_addr = self.fetch_byte();
+        let lower = (self.memory[ zp_addr as usize ] as u16) + (self.y as u16);
+        let mut upper: u16 = self.fetch_byte() as u16; // what happens if 0xff is 
+        if (lower > 0xff) {
+            upper += 0x1;  
+            upper &= 0xff; // in case there is an overflow
+        }
+        upper <<= 0x8;
+        return &mut self.memory[((lower & 0xff) + upper) as usize];
+    }
+
     // TODO: replace with None / Error out if the last case fails 
-    pub fn addr_mode_handler(&mut self, op: &Opcode) -> &mut u8 {
-        let addr_mode = Opcode::get_addr_mode(op);
+    // TODO: handle illegal opcodes, and the None case which implies that the opcode is not
+    // illegal, and that we don't need to use it 
+    pub fn addr_mode_handler(&mut self, op: u8) -> &mut u8 {
+        
+        let idx = op;
+        let addr_mode = self.optable[op as usize].addr_mode;
         match addr_mode {
-            x if x == Some(AddrMode::ZPG) => self.zpg(),
-            x if x == Some(AddrMode::ZPX) => self.zpx(),
-            x if x == Some(AddrMode::ZPY) => self.zpy(),
-            x if x == Some(AddrMode::ABS) => self.abs(),
-            x if x == Some(AddrMode::ABX) => self.abx(),
-            x if x == Some(AddrMode::ABY) => self.aby(),
-            _ => &mut self.memory[0x0],
+            a if a == AddrMode::ZPG => self.zpg(),
+            a if a == AddrMode::ZPX => self.zpx(),
+            a if a == AddrMode::ZPY => self.zpy(),
+            a if a == AddrMode::ABS => self.abs(),
+            a if a == AddrMode::ABX => self.abx(),
+            a if a == AddrMode::ABY => self.aby(),
+            a if a == AddrMode::IDX => self.idx(),
+            a if a == AddrMode::IDY => self.idy(),
+            a => &mut self.memory[0x0], // TODO: need to fix this
         }
     }
 
-    pub fn handle_dispatch(&mut self, op: &Opcode) {
-        match op {
-            x if self.is_ld_opcode(x) => {
-                let mem_ref: &mut u8 = self.addr_mode_handler(op); 
+    pub fn handle_dispatch(&mut self, op: u8) {
+        let cur: Inst = self.optable[op as usize].inst;
+        match cur {
+            Inst::LDA | Inst::LDX | Inst::LDY => {
+                let mem_ref :&mut u8 = self.addr_mode_handler(op);
                 let mem_val = *mem_ref;
-                self.ld_handle_dispatch(op, mem_val);
+                self.ld(cur, mem_val);
             }
+
             _ => {return; }
         }
     }
@@ -154,8 +236,9 @@ impl CPU {
     // TODO: maybe move this code somewhere else instead?
     pub fn execute(&mut self) {
         // Need to return true / false for everything I think 
+        // continue executing?
+        
         let opcode = self.fetch_byte();
-        // self.ld_exec(opcode) || self.st_exec(opcode) || self.tx_exec(opcode) || self.stack_exec(opcode);
-        // self.ld_exec(opcode);
+        self.handle_dispatch(opcode);
     }
 }
