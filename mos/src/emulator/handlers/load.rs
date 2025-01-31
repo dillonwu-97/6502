@@ -19,7 +19,12 @@ impl CPU {
         }
     }
 
-    pub fn ld(&mut self, inst: Inst, val: u8) {
+    pub fn ld(&mut self, op: u8, val: u8) {
+        self.cycle_count += self.optable[op as usize].cycle as u64;
+        if (self.boundary_flag) {
+            self.cycle_count +=1;
+        }
+        let inst = self.optable[op as usize].inst;
         match inst {
             Inst::LDA => {
                 self.ac = val; 

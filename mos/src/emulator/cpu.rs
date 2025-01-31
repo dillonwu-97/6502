@@ -33,15 +33,10 @@ pub struct CPU {
     pub x: u8,
     pub y: u8,
     pub sr: StatusRegister, // bitfield for the status bits
-    // maybe define some constants and then do the | operation? 
-    // not really sure lol 
     pub sp: u8,
     pub optable: Vec<OpWrapper>,
-
-    // TODO: What should the size of this be?
-    // TODO: Is each opcode equal to a cycle? I believe so 
-    // I feel like I don't really need to keep track of this until later
-    // cycles: u32,
+    pub cycle_count: u64,
+    pub boundary_flag: bool, // page boundary bit that gets set when we cross a page boundary
 }
 
 impl CPU {
@@ -59,7 +54,9 @@ impl CPU {
         Self {
             pc: 0, ac: 0, x: 0, y: 0, sr: StatusRegister::empty(), sp: 0xff, 
             memory: [0; MEMSIZE],
-            optable: op_vec 
+            optable: op_vec,
+            cycle_count: 0,
+            boundary_flag: false
         }
     }
     
@@ -87,8 +84,6 @@ impl CPU {
         self.sr.contains(flag)
     }
 
-    // grab the bytecode?
-    // no need to bee immutable i think 
     pub fn fetch_byte(&mut self) -> u8 {
         let byte = self.memory[self.pc as usize];
         self.pc += 1;
@@ -104,6 +99,7 @@ impl CPU {
 
     // All addressing mode functions should be returning some memory address to be used
     // Branch instructions are all relative so REL is not handled
+    // TODO: add cycle check for this as well 
     
     /*
     * Addressing mode functions should be grabbing that which we are reading from / writing to
@@ -140,24 +136,40 @@ impl CPU {
     * Zero Page, X addressing mode
     */
     pub fn zpx(&mut self) -> &mut u8 {
-        return &mut self.memory[ self.fetch_byte().wrapping_add(self.x as u8) as usize ];
+        return &mut self.memory[ self.fetch_byte().wrapping_add( self.x as u8) as usize ]; 
     }
 
+    /* 
+    * Zero Page, Y addressing mode
+    */
     pub fn zpy(&mut self) -> &mut u8 {
+        // TODO: check if page boundary has been crossed
         return &mut self.memory[ self.fetch_byte().wrapping_add( self.y as u8) as usize ]; 
     }
 
+    /*
+    * Abs addressing mode
+    */
     pub fn abs(&mut self) -> &mut u8 {
         return &mut self.memory[ self.fetch_two() as usize ];
     }
 
     pub fn abx(&mut self) -> &mut u8 {
-        let val = self.fetch_two().wrapping_add(self.x as u16);
+        // TODO: check if page boundary has been crossed
+        let addend = self.fetch_two();
+        let val = addend.wrapping_add(self.x as u16);
+        if ((val >> 0x8) != (addend >> 0x8)) {
+            self.boundary_flag = true;
+        }
         return &mut self.memory[ val as usize ];
     }
 
     pub fn aby(&mut self) -> &mut u8 {
-        let val = self.fetch_two().wrapping_add(self.y as u16);
+        let addend = self.fetch_two();
+        let val = addend.wrapping_add(self.y as u16);
+        if ((val >> 0x8) != (addend >> 0x8)) {
+            self.boundary_flag = true;
+        }
         return &mut self.memory[ val as usize ];
     }
 
@@ -191,14 +203,17 @@ impl CPU {
     * https://stackoverflow.com/questions/46262435/indirect-y-indexed-addressing-mode-in-mos-6502
     * TODO: if wrapping_add then cycle count goes up by 1 probs
     */
+    // TODO: add page boundary checker
     pub fn idy(&mut self) -> &mut u8 {
-        let zpg_addr = self.fetch_byte() as u16;
+        let zpg_addr = self.fetch_byte();
         let mut lower = self.memory[ zpg_addr as usize ] as u16;
-        let mut upper = self.memory[ zpg_addr.wrapping_add(0x01) as usize ] as u16;
+        let mut upper = self.memory[ zpg_addr.wrapping_add(0x01) as usize ] as u16; // wrapping add
+        // for the next mem location to read the high byte
         lower += self.y as u16;
         if (lower > 0xff) {
             upper += 0x1;  
             upper &= 0xff; // in case there is an overflow
+            self.boundary_flag = true;
         }
         upper <<= 0x8;
         return &mut self.memory[((lower & 0xff) + upper) as usize];
@@ -208,7 +223,6 @@ impl CPU {
     // TODO: handle illegal opcodes, and the None case which implies that the opcode is not
     // illegal, and that we don't need to use it 
     pub fn addr_mode_handler(&mut self, op: u8) -> &mut u8 {
-        
         let idx = op;
         let addr_mode = self.optable[op as usize].addr_mode;
         match addr_mode {
@@ -231,17 +245,19 @@ impl CPU {
             Inst::LDA | Inst::LDX | Inst::LDY => {
                 let mem_ref :&mut u8 = self.addr_mode_handler(op);
                 let mem_val = *mem_ref;
-                self.ld(cur, mem_val);
+                self.ld(op, mem_val);
             }
             _ => {return; }
         }
+        self.boundary_flag = false;
     }
 
-    // TODO: maybe move this code somewhere else instead?
+    /*
+    * Execute instructions
+    */
     pub fn execute(&mut self) {
         // Need to return true / false for everything I think 
         // continue executing?
-        
         let opcode = self.fetch_byte();
         self.handle_dispatch(opcode);
     }

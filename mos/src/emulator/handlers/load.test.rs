@@ -104,6 +104,19 @@ mod tests {
         let new_pc = cpu.pc;
         assert_eq!(cpu.ac, 0x41);
         assert_eq!(new_pc - old_pc, 2); // only 2 bytes of execution
+        assert_eq!(cpu.cycle_count, 6); 
+        //
+        //
+        cpu.pc = 0x0;
+        cpu.memory[0x1] = 0x10;
+        cpu.memory[0x10] = 0x00;
+        cpu.memory[0x11] = 0x03;
+        cpu.memory[0x390] = 0x42;
+        cpu.execute();
+        let new_pc = cpu.pc;
+        assert_eq!(cpu.ac, 0x42);
+        assert_eq!(new_pc - old_pc, 2); // only 2 bytes of execution
+
     }
 
 
