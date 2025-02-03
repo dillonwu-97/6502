@@ -281,13 +281,19 @@ impl CPU {
             }
 
             // Logical operations
-            // TODO: check boundary flag for these
+            // We need to check the boundary flags for these
             Inst::AND | Inst::EOR | Inst::ORA | Inst::BIT => {
                 let mem_ref: &mut u8 = self.addr_mode_handler(op);
                 let mem_val: u8 = *mem_ref;
                 self.log(cur, mem_val);
             }
 
+            // Arithmetic operations
+            Inst::ADC | Inst::SBC | Inst::CMP | Inst::CPX | Inst::CPY => {
+                let mem_ref: &mut u8 = self.addr_mode_handler(op);
+                let mem_val: u8 = *mem_ref;
+                self.ath(cur, mem_val);
+            }
             // 
             _ => {return; }
         }
