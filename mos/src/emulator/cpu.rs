@@ -9,19 +9,28 @@ use crate::emulator::inst_arr;
 use crate::emulator::cycle_arr;
 use crate::emulator::addrmode_arr;
 use crate::emulator::opcode_arr;
+use crate::emulator::flag_arr;
+
+pub const C: u8 = 1 << 0;
+pub const Z: u8 = 1 << 1;
+pub const I: u8 = 1 << 2;
+pub const D: u8 = 1 << 3;
+pub const B: u8 = 1 << 4;
+pub const V: u8 = 1 << 6;
+pub const N: u8 = 1 << 7;
 
 // I wonder if there is a better way to do this or nah 
 pub const MEMSIZE: usize = 2 << 16;
 bitflags! {
     pub struct StatusRegister: u8 {
-        const C = 0b0000_0001; // carry
-        const Z = 0b0000_0010; // zero
-        const I = 0b0000_0100; // interrupt
-        const D = 0b0000_1000; // decimal 
-        const B = 0b0001_0000; // break
+        const C = C; // carry
+        const Z = Z; // zero
+        const I = I; // interrupt
+        const D = D; // decimal 
+        const B = B; // break
                     // unused 5th bit
-        const V = 0b0100_0000; // overflow
-        const N = 0b1000_0000; // negative
+        const V = V; // overflow
+        const N = N; // negative
     }
 }
 
@@ -47,7 +56,8 @@ impl CPU {
                 opcode_arr[i],
                 addrmode_arr[i],
                 cycle_arr[i],
-                inst_arr[i]
+                inst_arr[i],
+                flag_arr[i]
             );
             op_vec.push(new_wrapper);
         }
@@ -241,12 +251,36 @@ impl CPU {
 
     pub fn handle_dispatch(&mut self, op: u8) {
         let cur: Inst = self.optable[op as usize].inst;
+        self.cycle_count += self.optable[op as usize].cycle as u64;
         match cur {
+            // Load operations
             Inst::LDA | Inst::LDX | Inst::LDY => {
-                let mem_ref :&mut u8 = self.addr_mode_handler(op);
+                let mem_ref: &mut u8 = self.addr_mode_handler(op);
                 let mem_val = *mem_ref;
-                self.ld(op, mem_val);
+                self.ld(cur, mem_val);
             }
+
+            // Store operations
+            Inst::STA | Inst::STX | Inst::STY => {
+                let to_store = self.st(cur);
+                let mem_ref: &mut u8 = self.addr_mode_handler(op);
+                *mem_ref = to_store;
+            }
+
+            // Register Transfers
+            // These isntructions are implied addressing mode instructions so we dont need to use
+            // the addressing mode information
+            Inst::TAX | Inst::TAY | Inst::TXA | Inst::TYA => {
+                self.tx(cur);
+            }
+
+            // Stack operations
+            // Also implied addressing mode operations
+            Inst::TSX | Inst::TXS | Inst::PHA | Inst::PHP | Inst::PLA | Inst::PLP => {
+                self.st(cur); 
+            }
+
+            // 
             _ => {return; }
         }
         self.boundary_flag = false;
