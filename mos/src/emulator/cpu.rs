@@ -277,7 +277,15 @@ impl CPU {
             // Stack operations
             // Also implied addressing mode operations
             Inst::TSX | Inst::TXS | Inst::PHA | Inst::PHP | Inst::PLA | Inst::PLP => {
-                self.st(cur); 
+                self.stack(cur); 
+            }
+
+            // Logical operations
+            // TODO: check boundary flag for these
+            Inst::AND | Inst::EOR | Inst::ORA | Inst::BIT => {
+                let mem_ref: &mut u8 = self.addr_mode_handler(op);
+                let mem_val: u8 = *mem_ref;
+                self.log(cur, mem_val);
             }
 
             // 

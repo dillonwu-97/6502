@@ -2,11 +2,13 @@
 use crate::emulator::CPU;
 use crate::emulator::cpu::StatusRegister;
 use crate::emulator::Opcode;
-
+use crate::emulator::Inst;
+use crate::emulator::cpu::N;
+use crate::emulator::cpu::V;
 
 impl CPU {
 
-    pub(crate) fn log_set_status(&mut self, register: u8) {
+    fn log_set_status(&mut self, register: u8) {
         if register == 0 {
             self.set_status(StatusRegister::Z);
         }     
@@ -15,76 +17,35 @@ impl CPU {
         }
     }
 
-    // Switching between operands
-    // Actually might be better to just move this all into the main CPU file b/c there is a lot of
-    // redundancy in the fetch_byte() function call 
-    fn log_fetch_operand(&mut self, op: Opcode) -> Option<u8> {
-        Some(match op {
-            Opcode::AND_IMM | Opcode::EOR_IMM | Opcode::ORA_IMM => 
-                self.fetch_byte(),
-            Opcode::AND_ZPG | Opcode::EOR_ZPG | Opcode::ORA_ZPG => 
-                self.memory[ self.fetch_byte() as usize ], 
-            Opcode::AND_ZPX | Opcode::EOR_ZPX | Opcode::ORA_ZPX =>
-                self.memory[ self.fetch_byte().wrapping_add(self.x) as usize ],
-            Opcode::AND_ABS | Opcode::EOR_ABS | Opcode::ORA_ABS =>
-                self.memory[ self.fetch_two() as usize ],
-            Opcode::AND_ABX | Opcode::EOR_ABX | Opcode::ORA_ABX =>
-                self.memory[ self.fetch_two().wrapping_add(self.x as u16) as usize ],
-            Opcode::AND_ABY | Opcode::EOR_ABY | Opcode::ORA_ABY =>
-                self.memory[ self.fetch_two().wrapping_add(self.y as u16) as usize ],
-            Opcode::AND_INX | Opcode::EOR_INX | Opcode::ORA_INX => {
-                unimplemented!()
-            }
-            Opcode::AND_INY | Opcode::EOR_INY | Opcode::ORA_INY => {
-                unimplemented!()
-            }
-            _ => return None,
-        })
-    }
-
-    pub(crate) fn log_handle_ops<F>(&mut self, opcode: u8, operation: F) -> bool 
-    where 
-        F: Fn(u8, u8) -> u8
-    {
-        let op = Opcode::from(opcode);    
-        if let Some(operand) = self.log_fetch_operand(op) {
-            self.ac = operation(self.ac, operand); 
-            self.log_set_status(self.ac);
-            true
-        } else {
-            false
+    // val is val held in memory
+    pub fn log(&mut self, inst: Inst, val: u8) {
+        if (self.boundary_flag) {
+            self.cycle_count += 1;
         }
-    }
-
-    pub(crate) fn and_exec(&mut self, opcode: u8) -> bool {
-        self.log_handle_ops(opcode, | a,b | a & b )
-    }
-
-    pub(crate) fn eor_exec(&mut self, opcode: u8) -> bool {
-        self.log_handle_ops(opcode, | a,b | a ^ b )
-    }
-
-    pub(crate) fn ora_exec(&mut self, opcode: u8) -> bool {
-        self.log_handle_ops(opcode, | a,b | a | b )
-    }
-
-    pub(crate) fn bit_test(&mut self, opcode: u8) -> bool {
-        let op = Opcode::from(opcode);
-        match op {
-            Opcode::BIT_ZPG => {
-
+        match inst {
+            Inst::AND => {
+                self.ac &= val;     
+                self.log_set_status(self.ac);
+            } ,
+            Inst::EOR => {
+                self.ac ^= val;
+                self.log_set_status(self.ac);
             }
-            Opcode::BIT_ABS => {
+            Inst::ORA => {
+                self.ac |= val;
+                self.log_set_status(self.ac);
+            }
+            Inst::BIT => {
+                if (self.ac & val == 0) {
+                    self.set_status(StatusRegister::Z);
+                }
 
+                if (val & N == 1) { self.set_status(StatusRegister::N) } else { self.clear_status(StatusRegister::N) };
+                if (val & V == 1) { self.set_status(StatusRegister::V) } else { self.clear_status(StatusRegister::V) };
             }
-            _ => {
-                return false;
-            }
+            _ => {return;}
+
         }
-        true
-    }
 
-    pub(crate) fn log_exec(&mut self, opcode: u8) -> bool {
-        self.and_exec(opcode) | self.eor_exec(opcode) | self.ora_exec(opcode)
     }
 }
