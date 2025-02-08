@@ -238,6 +238,7 @@ impl CPU {
         let addr_mode = self.optable[op as usize].addr_mode;
         match addr_mode {
             a if a == AddrMode::IMM => self.imm(),
+            a if a == AddrMode::ACC => self.acc(),
             a if a == AddrMode::ZPG => self.zpg(),
             a if a == AddrMode::ZPX => self.zpx(),
             a if a == AddrMode::ZPY => self.zpy(),
@@ -305,8 +306,23 @@ impl CPU {
                     self.cycle_count += 1;
                 }
             }
-            // 
+
+            // Shift operations
+            Inst::ASL | Inst::LSR | Inst::ROL | Inst::ROR => {
+                // TODO: add addressing mode for accumulator 
+                // the return value for the handler might be different depending on if it's the
+                // accumulator actually, so we might need a special case to handle this?
+                // unless we can get a reference to self.ac itself
+                // because it can be both accumulator or memory location, we need to return the
+                // value from the function to use it here
+                // - [ ] 
+                let mem_ref: &mut u8 = self.addr_mode_handler(op);
+                let mem_val: u8 = *mem_ref;
+                self.sh(cur, mem_val); 
+            }
+
             
+            // Increment / Decrement operations
             Inst::INC | Inst::INX | Inst::INY | Inst::DEC | Inst::DEX | Inst::DEY => {
                 // no boundary check needed
                 // TODO: figure out a way to move this to its own separate file without pissing off
@@ -321,11 +337,8 @@ impl CPU {
                 // it was ok because we didn't use the borrow i think 
                 // in theory, we should be able to do the borrow inside self.idc to bypass this
                 // issue?
-                
-
-                // this is not allowed because we get data from self while it is
-                // being written to?
-                match cur { // TODO: do i need to do wrapping_add for each of this?
+                //
+                match cur { 
                     Inst::INC => {
                         *mem_ref += 1;
                         let mem_val = *mem_ref;
