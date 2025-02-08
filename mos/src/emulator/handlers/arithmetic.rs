@@ -33,9 +33,6 @@ impl CPU {
     }
 
     pub fn ath(&mut self, inst: Inst, mem_val: u8) {
-        if (self.boundary_flag) {
-            self.cycle_count += 1;
-        }
         match inst {
             Inst::ADC => {
                 // carry flag is set if the addition bleeds out
@@ -120,7 +117,6 @@ impl CPU {
                 // maybe not 
                 // ok for this at least, carry is set when we have something like -128 + -128 ->
                 // -256 so if the result is > a 
-
 
             }
             Inst::CMP => {

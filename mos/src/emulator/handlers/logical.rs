@@ -19,9 +19,6 @@ impl CPU {
 
     // val is val held in memory
     pub fn log(&mut self, inst: Inst, val: u8) {
-        if (self.boundary_flag) {
-            self.cycle_count += 1;
-        }
         match inst {
             Inst::AND => {
                 self.ac &= val;     
@@ -46,6 +43,6 @@ impl CPU {
             _ => {return;}
 
         }
-
     }
+
 }
