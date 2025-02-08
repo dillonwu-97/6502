@@ -8,7 +8,7 @@ use crate::emulator::Inst;
 
 impl CPU {
 
-    pub fn tx_set_status(&mut self, register: u8) {
+    fn tx_set_status(&mut self, register: u8) {
         if register == 0 {
             self.set_status(StatusRegister::Z);
         }
