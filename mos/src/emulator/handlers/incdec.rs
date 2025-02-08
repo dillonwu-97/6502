@@ -16,10 +16,37 @@ impl CPU {
         }
     }
 
-    pub fn idc(&mut self, mem_val: u8) {
-        self.x += 1;
-        // return self.x; 
+    pub fn idc(&mut self, inst: Inst, idx: usize) {
+        match inst {
+            Inst::INC => {
+                self.memory[idx] += 1;
+                self.idc_set_status(self.memory[idx]);
+            },
+            Inst::INX => {
+                self.x += 1; 
+                self.idc_set_status(self.x);
+            },
+            Inst::INY => {
+                self.y += 1;
+                self.idc_set_status(self.y);
+            },
+            Inst::DEC => {
+                self.memory[idx] += 1;
+                self.idc_set_status(self.memory[idx]);
+            },
+            Inst::DEX => {
+                self.x -= 1;
+                self.idc_set_status(self.x);
+            },
+            Inst::DEY => {
+                self.y -= 1;
+                self.idc_set_status(self.y);
+            },
+            _ => {return; }
+
+        }
     }
+
     // pub fn idc(&mut self, inst: Inst, mem_val: u8) -> u8 {
     //     match inst {
     //         Inst::INC => {
