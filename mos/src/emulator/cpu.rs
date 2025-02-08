@@ -10,6 +10,7 @@ use crate::emulator::cycle_arr;
 use crate::emulator::addrmode_arr;
 use crate::emulator::opcode_arr;
 use crate::emulator::flag_arr;
+// use crate::emulator::handlers::incdec::idc;
 
 pub const C: u8 = 1 << 0;
 pub const Z: u8 = 1 << 1;
@@ -258,6 +259,9 @@ impl CPU {
                 let mem_ref: &mut u8 = self.addr_mode_handler(op);
                 let mem_val = *mem_ref;
                 self.ld(cur, mem_val);
+                if (self.boundary_flag) {
+                    self.cycle_count +=1;
+                }
             }
 
             // Store operations
@@ -286,15 +290,71 @@ impl CPU {
                 let mem_ref: &mut u8 = self.addr_mode_handler(op);
                 let mem_val: u8 = *mem_ref;
                 self.log(cur, mem_val);
+                if (self.boundary_flag) {
+                    self.cycle_count += 1;
+                }
             }
 
             // Arithmetic operations
             Inst::ADC | Inst::SBC | Inst::CMP | Inst::CPX | Inst::CPY => {
+                
                 let mem_ref: &mut u8 = self.addr_mode_handler(op);
                 let mem_val: u8 = *mem_ref;
                 self.ath(cur, mem_val);
+                if (self.boundary_flag) { // set in the address mode handler
+                    self.cycle_count += 1;
+                }
             }
             // 
+            
+            Inst::INC | Inst::INX | Inst::INY | Inst::DEC | Inst::DEX | Inst::DEY => {
+                // no boundary check needed
+                // TODO: figure out a way to move this to its own separate file without pissing off
+                // the borrow checker; kind of hard though
+                let x: u8 = self.x;
+                let y: u8 = self.y;
+                let mem_ref: &mut u8 = self.addr_mode_handler(op);
+                // let a = self.idc(1);
+                // self.idc(1);
+                // *mem_ref = 1;
+                // *mem_ref = a;
+                // it was ok because we didn't use the borrow i think 
+                // in theory, we should be able to do the borrow inside self.idc to bypass this
+                // issue?
+                
+
+                // this is not allowed because we get data from self while it is
+                // being written to?
+                match cur { // TODO: do i need to do wrapping_add for each of this?
+                    Inst::INC => {
+                        *mem_ref += 1;
+                        let mem_val = *mem_ref;
+                        self.idc_set_status(mem_val);
+                    },
+                    Inst::INX => {
+                        self.x += 1; 
+                        self.idc_set_status(self.x);
+                    },
+                    Inst::INY => {
+                        self.y += 1;
+                        self.idc_set_status(self.y);
+                    },
+                    Inst::DEC => {
+                        *mem_ref -= 1;
+                        let mem_val = *mem_ref;
+                        self.idc_set_status(mem_val);
+                    },
+                    Inst::DEX => {
+                        self.x -= 1;
+                        self.idc_set_status(self.x);
+                    },
+                    Inst::DEY => {
+                        self.y -= 1;
+                        self.idc_set_status(self.y);
+                    },
+                    _ => {return; }
+                }
+            }
             _ => {return; }
         }
         self.boundary_flag = false;
