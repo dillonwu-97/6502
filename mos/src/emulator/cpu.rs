@@ -118,9 +118,10 @@ impl CPU {
 
     /*
     * Immediate addressing mode
+    * // TODO: 
     */
-    pub fn imm(&mut self) -> &mut u8 {
-        let ret = &mut self.memory[ self.pc as usize ];
+    pub fn imm(&mut self) -> usize {
+        let ret = self.pc as usize;
         self.pc += 1;
         return ret;
     }
@@ -129,9 +130,10 @@ impl CPU {
     * Operates directly on the accumulator 
     *
     * Four instructions that operate in this mode: ASL, ROL, LSR, ROR
+    * TODO: special case to separate this out / THIS IS WRONG
     */
-    pub fn acc(&mut self) -> &mut u8 {
-        return &mut self.ac 
+    pub fn acc(&mut self) -> usize {
+        return self.ac as usize;
     }
 
     /*
@@ -139,49 +141,49 @@ impl CPU {
     *
     * Returns reference to memory 
     */
-    pub fn zpg(&mut self) -> &mut u8 {
-        return &mut self.memory[ self.fetch_byte() as usize ];
+    pub fn zpg(&mut self) -> usize {
+        return self.fetch_byte() as usize;
     }
 
     /* 
     * Zero Page, X addressing mode
     */
-    pub fn zpx(&mut self) -> &mut u8 {
-        return &mut self.memory[ self.fetch_byte().wrapping_add( self.x as u8) as usize ]; 
+    pub fn zpx(&mut self) -> usize {
+        return self.fetch_byte().wrapping_add( self.x as u8) as usize;
     }
 
     /* 
     * Zero Page, Y addressing mode
     */
-    pub fn zpy(&mut self) -> &mut u8 {
+    pub fn zpy(&mut self) -> usize {
         // TODO: check if page boundary has been crossed
-        return &mut self.memory[ self.fetch_byte().wrapping_add( self.y as u8) as usize ]; 
+        return self.fetch_byte().wrapping_add( self.y as u8) as usize;
     }
 
     /*
     * Abs addressing mode
     */
-    pub fn abs(&mut self) -> &mut u8 {
-        return &mut self.memory[ self.fetch_two() as usize ];
+    pub fn abs(&mut self) -> usize {
+        return self.fetch_two() as usize;
     }
 
-    pub fn abx(&mut self) -> &mut u8 {
+    pub fn abx(&mut self) -> usize {
         // TODO: check if page boundary has been crossed
         let addend = self.fetch_two();
         let val = addend.wrapping_add(self.x as u16);
         if ((val >> 0x8) != (addend >> 0x8)) {
             self.boundary_flag = true;
         }
-        return &mut self.memory[ val as usize ];
+        return val as usize;
     }
 
-    pub fn aby(&mut self) -> &mut u8 {
+    pub fn aby(&mut self) -> usize {
         let addend = self.fetch_two();
         let val = addend.wrapping_add(self.y as u16);
         if ((val >> 0x8) != (addend >> 0x8)) {
             self.boundary_flag = true;
         }
-        return &mut self.memory[ val as usize ];
+        return val as usize;
     }
 
     // Absolute indirect
@@ -190,11 +192,11 @@ impl CPU {
     // byte of the jump address
     // The next byte afterwards is the upper byte of the jump address
     // TODO: check the pc count for this
-    pub fn ind(&mut self) -> &mut u8 {
+    pub fn ind(&mut self) -> usize {
         let lower = self.fetch_byte() as u16;   
         let upper = self.fetch_byte() as u16;
         let jmp_addr = lower + (upper << 8);
-        return &mut self.memory[ jmp_addr as usize ];
+        return jmp_addr as usize;
     }
 
     // TODO: edge case: both memory locations (upper / lower) specifying the high and low order
@@ -202,12 +204,12 @@ impl CPU {
     // e.g. zp_addr = 0xff
     // TODO: add a test case that handles the edge case
     // need to fix this
-    pub fn idx(&mut self) -> &mut u8 {
+    pub fn idx(&mut self) -> usize {
         let zp_addr = self.fetch_byte().wrapping_add(self.x);  // zero page addr
         let lower = self.memory[ zp_addr as usize ] as u16;
         let upper = self.memory[ zp_addr.wrapping_add(0x1) as usize ] as u16;
         let addr = (upper << 0x8) + lower;
-        return &mut self.memory[ addr as usize ];
+        return addr as usize;
     }
     
     /*
@@ -215,7 +217,7 @@ impl CPU {
     * TODO: if wrapping_add then cycle count goes up by 1 probs
     */
     // TODO: add page boundary checker
-    pub fn idy(&mut self) -> &mut u8 {
+    pub fn idy(&mut self) -> usize {
         let zpg_addr = self.fetch_byte();
         let mut lower = self.memory[ zpg_addr as usize ] as u16;
         let mut upper = self.memory[ zpg_addr.wrapping_add(0x01) as usize ] as u16; // wrapping add
@@ -227,13 +229,13 @@ impl CPU {
             self.boundary_flag = true;
         }
         upper <<= 0x8;
-        return &mut self.memory[((lower & 0xff) + upper) as usize];
+        return ((lower & 0xff) + upper) as usize;
     }
 
     // TODO: replace with None / Error out if the last case fails 
     // TODO: handle illegal opcodes, and the None case which implies that the opcode is not
     // illegal, and that we don't need to use it 
-    pub fn addr_mode_handler(&mut self, op: u8) -> &mut u8 {
+    pub fn addr_mode_handler(&mut self, op: u8) -> usize {
         let idx = op;
         let addr_mode = self.optable[op as usize].addr_mode;
         match addr_mode {
@@ -247,7 +249,7 @@ impl CPU {
             a if a == AddrMode::ABY => self.aby(),
             a if a == AddrMode::IDX => self.idx(),
             a if a == AddrMode::IDY => self.idy(),
-            a => &mut self.memory[0x0], // TODO: need to fix this
+            a => 0x0, // TODO: need to fix this
         }
     }
 
@@ -257,8 +259,8 @@ impl CPU {
         match cur {
             // Load operations
             Inst::LDA | Inst::LDX | Inst::LDY => {
-                let mem_ref: &mut u8 = self.addr_mode_handler(op);
-                let mem_val = *mem_ref;
+                let idx: usize = self.addr_mode_handler(op);
+                let mem_val = self.memory[idx];
                 self.ld(cur, mem_val);
                 if (self.boundary_flag) {
                     self.cycle_count +=1;
@@ -268,8 +270,9 @@ impl CPU {
             // Store operations
             Inst::STA | Inst::STX | Inst::STY => {
                 let to_store = self.st(cur);
-                let mem_ref: &mut u8 = self.addr_mode_handler(op);
-                *mem_ref = to_store;
+                let idx: usize = self.addr_mode_handler(op);
+                self.memory[idx] = to_store;
+
             }
 
             // Register Transfers
@@ -288,8 +291,8 @@ impl CPU {
             // Logical operations
             // We need to check the boundary flags for these
             Inst::AND | Inst::EOR | Inst::ORA | Inst::BIT => {
-                let mem_ref: &mut u8 = self.addr_mode_handler(op);
-                let mem_val: u8 = *mem_ref;
+                let idx: usize = self.addr_mode_handler(op);
+                let mem_val = self.memory[idx];
                 self.log(cur, mem_val);
                 if (self.boundary_flag) {
                     self.cycle_count += 1;
@@ -299,8 +302,8 @@ impl CPU {
             // Arithmetic operations
             Inst::ADC | Inst::SBC | Inst::CMP | Inst::CPX | Inst::CPY => {
                 
-                let mem_ref: &mut u8 = self.addr_mode_handler(op);
-                let mem_val: u8 = *mem_ref;
+                let idx: usize = self.addr_mode_handler(op);
+                let mem_val: u8 = self.memory[idx];
                 self.ath(cur, mem_val);
                 if (self.boundary_flag) { // set in the address mode handler
                     self.cycle_count += 1;
@@ -316,8 +319,8 @@ impl CPU {
                 // because it can be both accumulator or memory location, we need to return the
                 // value from the function to use it here
                 // - [ ] 
-                let mem_ref: &mut u8 = self.addr_mode_handler(op);
-                let mem_val: u8 = *mem_ref;
+                let idx: usize = self.addr_mode_handler(op);
+                let mem_val: u8 = self.memory[idx];
                 self.sh(cur, mem_val); 
             }
 
@@ -329,7 +332,7 @@ impl CPU {
                 // the borrow checker; kind of hard though
                 let x: u8 = self.x;
                 let y: u8 = self.y;
-                let mem_ref: &mut u8 = self.addr_mode_handler(op);
+                let idx: usize = self.addr_mode_handler(op);
                 // let a = self.idc(1);
                 // self.idc(1);
                 // *mem_ref = 1;
@@ -338,35 +341,35 @@ impl CPU {
                 // in theory, we should be able to do the borrow inside self.idc to bypass this
                 // issue?
                 //
-                match cur { 
-                    Inst::INC => {
-                        *mem_ref += 1;
-                        let mem_val = *mem_ref;
-                        self.idc_set_status(mem_val);
-                    },
-                    Inst::INX => {
-                        self.x += 1; 
-                        self.idc_set_status(self.x);
-                    },
-                    Inst::INY => {
-                        self.y += 1;
-                        self.idc_set_status(self.y);
-                    },
-                    Inst::DEC => {
-                        *mem_ref -= 1;
-                        let mem_val = *mem_ref;
-                        self.idc_set_status(mem_val);
-                    },
-                    Inst::DEX => {
-                        self.x -= 1;
-                        self.idc_set_status(self.x);
-                    },
-                    Inst::DEY => {
-                        self.y -= 1;
-                        self.idc_set_status(self.y);
-                    },
-                    _ => {return; }
-                }
+                // match cur { 
+                //     Inst::INC => {
+                //         *mem_ref += 1;
+                //         let mem_val = *mem_ref;
+                //         self.idc_set_status(mem_val);
+                //     },
+                //     Inst::INX => {
+                //         self.x += 1; 
+                //         self.idc_set_status(self.x);
+                //     },
+                //     Inst::INY => {
+                //         self.y += 1;
+                //         self.idc_set_status(self.y);
+                //     },
+                //     Inst::DEC => {
+                //         *mem_ref -= 1;
+                //         let mem_val = *mem_ref;
+                //         self.idc_set_status(mem_val);
+                //     },
+                //     Inst::DEX => {
+                //         self.x -= 1;
+                //         self.idc_set_status(self.x);
+                //     },
+                //     Inst::DEY => {
+                //         self.y -= 1;
+                //         self.idc_set_status(self.y);
+                //     },
+                //     _ => {return; }
+                // }
             }
             _ => {return; }
         }
