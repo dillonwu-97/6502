@@ -101,7 +101,6 @@ impl CPU {
         } else {
             cur_val = self.memory[idx];
         }
-
         self.sh_set_status(cur_val, prev_val, dir);
     }
 }
