@@ -1,4 +1,5 @@
 mod arithmetic;
+mod branches;
 mod incdec;
 mod jumps;
 mod load;

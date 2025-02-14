@@ -17,6 +17,7 @@ impl CPU {
         let mut new_pc: u16 = ((i_pc + i_offset) % (MEMSIZE as i32)) as u16;
         let mut status_flag: bool = false;
         let mut table = HashMap::new();
+
         // format is key = instruction, value = boolean of how to set the new pc 
         table.insert(Inst::BCC, !self.get_status(StatusRegister::C));
         table.insert(Inst::BCS, self.get_status(StatusRegister::C));
@@ -27,8 +28,6 @@ impl CPU {
         table.insert(Inst::BVC, !self.get_status(StatusRegister::V));
         table.insert(Inst::BVS, self.get_status(StatusRegister::V));
 
-        // TODO: is there a more elegant way to doing this?
-        //
         if table[&inst] {
             self.pc = new_pc; // the edge case is if we need to wrap back around
             // in the subtraction

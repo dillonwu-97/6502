@@ -110,7 +110,6 @@ impl CPU {
 
     // All addressing mode functions should be returning some memory address to be used
     // Branch instructions are all relative so REL is not handled
-    // TODO: add cycle check for this as well 
     
     /*
     * Addressing mode functions should be grabbing that which we are reading from / writing to
@@ -118,7 +117,6 @@ impl CPU {
 
     /*
     * Immediate addressing mode
-    * // TODO: 
     */
     pub fn imm(&mut self) -> usize {
         let ret = self.pc as usize;
@@ -133,7 +131,7 @@ impl CPU {
     * TODO: special case to separate this out / THIS IS WRONG
     */
     pub fn acc(&mut self) -> usize {
-        return self.ac as usize;
+        return usize::MAX;
     }
 
     /*
@@ -161,6 +159,15 @@ impl CPU {
     }
 
     /*
+    * Relative addressing mode
+    *
+    * Returns a value from -128 -> 127 as usize
+    */
+    pub fn rel(&mut self) -> usize {
+        return self.fetch_byte() as usize;
+    }
+
+    /*
     * Abs addressing mode
     */
     pub fn abs(&mut self) -> usize {
@@ -168,7 +175,6 @@ impl CPU {
     }
 
     pub fn abx(&mut self) -> usize {
-        // TODO: check if page boundary has been crossed
         let addend = self.fetch_two();
         let val = addend.wrapping_add(self.x as u16);
         if ((val >> 0x8) != (addend >> 0x8)) {
@@ -214,9 +220,7 @@ impl CPU {
     
     /*
     * https://stackoverflow.com/questions/46262435/indirect-y-indexed-addressing-mode-in-mos-6502
-    * TODO: if wrapping_add then cycle count goes up by 1 probs
     */
-    // TODO: add page boundary checker
     pub fn idy(&mut self) -> usize {
         let zpg_addr = self.fetch_byte();
         let mut lower = self.memory[ zpg_addr as usize ] as u16;
@@ -244,12 +248,13 @@ impl CPU {
             a if a == AddrMode::ZPG => self.zpg(),
             a if a == AddrMode::ZPX => self.zpx(),
             a if a == AddrMode::ZPY => self.zpy(),
+            a if a == AddrMode::REL => self.rel(),
             a if a == AddrMode::ABS => self.abs(),
             a if a == AddrMode::ABX => self.abx(),
             a if a == AddrMode::ABY => self.aby(),
             a if a == AddrMode::IDX => self.idx(),
             a if a == AddrMode::IDY => self.idy(),
-            a => 0x0, // TODO: need to fix this
+            a => usize::MAX, // TODO: need to fix this
         }
     }
 
@@ -309,68 +314,50 @@ impl CPU {
                     self.cycle_count += 1;
                 }
             }
-
-            // Shift operations
-            Inst::ASL | Inst::LSR | Inst::ROL | Inst::ROR => {
-                // TODO: add addressing mode for accumulator 
-                // the return value for the handler might be different depending on if it's the
-                // accumulator actually, so we might need a special case to handle this?
-                // unless we can get a reference to self.ac itself
-                // because it can be both accumulator or memory location, we need to return the
-                // value from the function to use it here
-                // - [ ] 
-                let idx: usize = self.addr_mode_handler(op);
-                let mem_val: u8 = self.memory[idx];
-                self.sh(cur, mem_val); 
-            }
-
             
             // Increment / Decrement operations
             Inst::INC | Inst::INX | Inst::INY | Inst::DEC | Inst::DEX | Inst::DEY => {
                 // no boundary check needed
                 // TODO: figure out a way to move this to its own separate file without pissing off
                 // the borrow checker; kind of hard though
-                let x: u8 = self.x;
-                let y: u8 = self.y;
                 let idx: usize = self.addr_mode_handler(op);
-                // let a = self.idc(1);
-                // self.idc(1);
-                // *mem_ref = 1;
-                // *mem_ref = a;
-                // it was ok because we didn't use the borrow i think 
-                // in theory, we should be able to do the borrow inside self.idc to bypass this
-                // issue?
-                //
-                // match cur { 
-                //     Inst::INC => {
-                //         *mem_ref += 1;
-                //         let mem_val = *mem_ref;
-                //         self.idc_set_status(mem_val);
-                //     },
-                //     Inst::INX => {
-                //         self.x += 1; 
-                //         self.idc_set_status(self.x);
-                //     },
-                //     Inst::INY => {
-                //         self.y += 1;
-                //         self.idc_set_status(self.y);
-                //     },
-                //     Inst::DEC => {
-                //         *mem_ref -= 1;
-                //         let mem_val = *mem_ref;
-                //         self.idc_set_status(mem_val);
-                //     },
-                //     Inst::DEX => {
-                //         self.x -= 1;
-                //         self.idc_set_status(self.x);
-                //     },
-                //     Inst::DEY => {
-                //         self.y -= 1;
-                //         self.idc_set_status(self.y);
-                //     },
-                //     _ => {return; }
-                // }
+                self.idc(cur, idx);
             }
+
+            // Shift operations
+            // only shift operations contains accumulator mode instructions
+            Inst::ASL | Inst::LSR | Inst::ROL | Inst::ROR => {
+                let idx: usize = self.addr_mode_handler(op);
+                // let mem_val: u8 = self.memory[idx];
+                if (idx == usize::MAX) {
+                    self.sh(cur, idx, true); 
+                } else {
+                    self.sh(cur, idx, false);
+                }
+            }
+
+            // TODO: not sure if this is the best way to handle RTS actually
+            Inst::JMP | Inst::JSR => {
+                // jmp = absolute / indirect, jsr = absolute, rts = implied
+                // absolute jmps means the idx value is not actually and idx, it's the value we
+                // want to jump to 
+                let jump_addr: usize = self.addr_mode_handler(op); 
+                self.jmp(cur, jump_addr);
+            }
+
+            Inst:: RTS => {
+                self.jmp(cur, usize::MAX);
+            }
+
+            Inst::BCC | Inst::BCS | Inst::BEQ | Inst::BMI | Inst::BNE | Inst::BPL | Inst::BVC | Inst::BVS => {
+                let offset: i8 = self.addr_mode_handler(op) as i8;
+                let orig_pc: u16 = self.pc - 2;
+                assert!(offset >= -128);
+                assert!(offset <= 127);
+                self.branch(cur, orig_pc, offset);
+                
+            }
+
             _ => {return; }
         }
         self.boundary_flag = false;

@@ -1,7 +1,6 @@
 // handle jumps and calls
 use crate::emulator::CPU;
 use crate::emulator::Inst;
-use crate::emulator::cpu::StatusRegister;
 
 
 impl CPU {
