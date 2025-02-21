@@ -6,6 +6,8 @@ mod load;
 mod logical;
 mod shifts;
 mod stack;
+mod status;
 mod store;
+mod system;
 mod transfer;
 

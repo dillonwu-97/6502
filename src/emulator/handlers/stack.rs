@@ -43,6 +43,8 @@ impl CPU {
                 // First option
                 // let flags = StatusRegister::from_bits(status).unwrap();
                 // self.sr = flags;
+                // not sure what this entails though
+                // TODO: need to ignore break flag and bit 5
 
                 // Second option
                 let flags = StatusRegister::from_bits(status);
@@ -56,32 +58,5 @@ impl CPU {
         }
 
     }
-
-    // pub(crate) fn stack_exec(&mut self, opcode: u8) -> bool {
-    //     let op = Opcode::from(opcode);         
-    //     match op {
-    //         Opcode::PHA => {
-    //             self.memory[self.sp as usize] = self.ac;
-    //             self.sp-=1;
-    //         }
-    //         Opcode::PHP => {
-    //             self.memory[self.sp as usize] = self.sr.bits();
-    //             self.sp-=1;
-    //         }
-    //         Opcode::PLA => {
-    //             self.ac = self.memory[self.sp as usize];
-    //             self.sp+=1;
-    //             self.sp_set_status(self.ac);
-    //         }
-    //         Opcode::PLP => {
-    //             self.sr = StatusRegister::from_bits_truncate(self.memory[self.sp as usize]);
-    //             self.sp += 1;
-    //         }
-    //         _ => {
-    //             return false;
-    //         }
-    //     }
-    //     true
-    // }
 }
 

@@ -355,7 +355,14 @@ impl CPU {
                 assert!(offset >= -128);
                 assert!(offset <= 127);
                 self.branch(cur, orig_pc, offset);
-                
+            }
+
+            Inst::CLC | Inst::CLD | Inst::CLI | Inst::CLV | Inst::SEC | Inst::SED | Inst::SEI => {
+                self.stats(cur);
+            }
+
+            Inst::BRK | Inst::NOP | Inst::RTI => {
+                self.sys(cur);
             }
 
             _ => {return; }
