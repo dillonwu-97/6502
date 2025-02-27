@@ -1,18 +1,20 @@
+use serde::{Serialize, Deserialize};
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct TestCase {
     pub name: String,
     pub initial: Parameters,
-    pub final: Parameters,
-    pub cycles: Vec<u16, u8, String)>,
+    pub r#final: Parameters,
+    pub cycles: Vec<(usize, u8, String)>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct Parameters {
-    pc: u16,
-    s: u8,
-    a: u8,
-    x: u8,
-    y: u8,
-    p: u8,
-    ram: Vec<(u16, u8)>,
+pub struct Parameters {
+    pub pc: u16,
+    pub s: u8,
+    pub a: u8,
+    pub x: u8,
+    pub y: u8,
+    pub p: u8,
+    pub ram: Vec<(usize, u8)>,
 }
