@@ -21,22 +21,22 @@ impl CPU {
             Inst::JSR => {
                 // might need to break this down into individual ops actually 
                 jump_addr -= 1;
-                self.memory[self.sp as usize] = (jump_addr >> 0x08) as u8;
-                self.sp -= 1;
-                self.memory[self.sp as usize] = ((jump_addr) & 0xff) as u8; // TODO: there might be some weird
+                self.memory[ 0x100 + self.sp as usize] = (jump_addr >> 0x08) as u8;
+                self.sp.wrapping_sub(1);
+                self.memory[ 0x100 + self.sp as usize] = ((jump_addr) & 0xff) as u8; // TODO: there might be some weird
                 // edge case when the lower byte is 0x00 
                 // we will need to modify the pc here actually
-                self.sp -= 1;
+                self.sp.wrapping_sub(1);
                 self.pc = jump_addr;
             },
             // TODO: why this also doing a minus 1
             // return from subroutine
             // add 1 to the value grabbed from memory
             Inst::RTS => {
-                jump_addr = self.memory[self.sp as usize] as u16; 
-                self.sp += 1;
-                jump_addr += (self.memory[self.sp as usize] as u16) << 8;
-                self.sp += 1;
+                jump_addr = self.memory[ 0x100 + self.sp as usize ] as u16; 
+                self.sp.wrapping_add(1);
+                jump_addr += (self.memory[ 0x100 + self.sp as usize ] as u16) << 8;
+                self.sp.wrapping_add(1);
                 jump_addr += 1;
             }
 

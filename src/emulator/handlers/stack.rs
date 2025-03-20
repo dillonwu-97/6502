@@ -26,20 +26,22 @@ impl CPU {
                 self.sp = self.x;
             }
             Inst::PHA => { // push accumulator
-                self.sp -= 1;
-                self.memory[self.sp as usize] = self.ac;
+                self.memory[ 0x100 + self.sp as usize ] = self.ac;
+                self.sp.wrapping_sub(1);
             }
             Inst::PHP => { // push register status
-                self.sp -= 1;
-                self.memory[ self.sp as usize ] = self.sr.bits();
+                self.set_status(StatusRegister::U);
+                self.set_status(StatusRegister::B);
+                self.memory[ 0x100 + self.sp as usize ] = self.sr.bits();
+                self.sp.wrapping_sub(1);
             }
             Inst::PLA => { // Pull accumulator from stack 
-                self.ac = self.memory[ self.sp as usize ];
+                self.ac = self.memory[ 0x100 + self.sp as usize ];
                 self.nz_status(self.ac);
-                self.sp += 1; 
+                self.sp.wrapping_add(1); 
             }
             Inst::PLP => { // pull processor status 
-                let status: u8 = self.memory[ self.sp as usize ];
+                let status: u8 = self.memory[ 0x100 + self.sp as usize ];
                 // First option
                 // let flags = StatusRegister::from_bits(status).unwrap();
                 // self.sr = flags;

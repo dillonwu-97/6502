@@ -12,11 +12,14 @@ use crate::emulator::opcode_arr;
 use crate::emulator::flag_arr;
 // use crate::emulator::handlers::incdec::idc;
 
+
+// TODO: should I find some way to handle the invalid bits?
 pub const C: u8 = 1 << 0;
 pub const Z: u8 = 1 << 1;
 pub const I: u8 = 1 << 2;
 pub const D: u8 = 1 << 3;
 pub const B: u8 = 1 << 4;
+pub const U: u8 = 1 << 5; 
 pub const V: u8 = 1 << 6;
 pub const N: u8 = 1 << 7;
 
@@ -29,14 +32,13 @@ bitflags! {
         const I = I; // interrupt
         const D = D; // decimal 
         const B = B; // break
-                    // unused 5th bit
+        const U = U; // unused 5th bit
         const V = V; // overflow
         const N = N; // negative
     }
 }
 
 pub struct CPU {
-
     pub memory: [u8; MEMSIZE],
     pub pc: u16,
     pub ac: u8, // accumulator
@@ -82,6 +84,17 @@ impl CPU {
         self.memory = [0; MEMSIZE];
     }
 
+    pub fn update(&mut self, pc: u16, ac: u8, x: u8, y: u8, sr: u8, sp: u8) {
+        self.pc = pc;
+        self.ac = ac;
+        self.x = x;
+        self.y = y;
+        // println!("value as u8: {}", sr);
+        self.sr = StatusRegister::from_bits_truncate(sr); // ignore the invalid bits, but not sure
+        // if this is the right way
+        self.sp = sp;
+    }
+
     // TODO: should these implementations be somewhere else?
     pub fn set_status(&mut self, flag: StatusRegister) {
         self.sr.insert(flag);
@@ -97,7 +110,7 @@ impl CPU {
 
     pub fn fetch_byte(&mut self) -> u8 {
         let byte = self.memory[self.pc as usize];
-        self.pc += 1;
+        self.pc = self.pc.wrapping_add(1);
         byte 
     }
 
