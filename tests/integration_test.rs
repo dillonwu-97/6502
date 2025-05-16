@@ -30,12 +30,22 @@ fn check(cpu: &mut CPU, testcases: &Vec<TestCase>) -> Result<(), String> {
     cpu.reset();
     for (i,tc) in testcases.iter().enumerate() {
         cpu.update(tc.initial.pc, tc.initial.a, tc.initial.x, tc.initial.y, tc.initial.p, tc.initial.s);
+        // this only checks the ram 
         for (j, v) in tc.initial.ram.iter().enumerate() {
             let (addr,val) = v;
             cpu.memory[ *addr ] = *val;
             // println!("Before *addr: {}, cpu val: {}", *addr, cpu.memory[*addr]);
         }
         cpu.execute();
+
+        // Check everything include sp / pc
+        println!("{}, {}, {}, {}, {}, {}", cpu.pc, cpu.sp, cpu.ac, cpu.x, cpu.y, cpu.sr.bits());
+        assert_eq!(tc.r#final.pc, cpu.pc);
+        assert_eq!(tc.r#final.s, cpu.sp);
+        assert_eq!(tc.r#final.a, cpu.ac);
+        assert_eq!(tc.r#final.x, cpu.x);
+        assert_eq!(tc.r#final.y, cpu.y);
+        assert_eq!(tc.r#final.p, cpu.sr.bits());
         for (j, v) in tc.r#final.ram.iter().enumerate() {
             let (addr, val) = v;
             // println!("After {}, {}, {}", *addr, cpu.memory[*addr], *val);

@@ -378,6 +378,10 @@ impl CPU {
                 self.sys(cur);
             }
 
+            Inst::ILL => {
+                self.pc.wrapping_add(1);
+            }
+
             _ => {return; }
         }
         self.boundary_flag = false;
