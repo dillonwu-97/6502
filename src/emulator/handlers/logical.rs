@@ -11,9 +11,13 @@ impl CPU {
     fn log_set_status(&mut self, register: u8) {
         if register == 0 {
             self.set_status(StatusRegister::Z);
-        }     
+        } else {
+            self.clear_status(StatusRegister::Z);
+        }
         if register >> 7 == 1 {
             self.set_status(StatusRegister::N);
+        } else {
+            self.clear_status(StatusRegister::N);
         }
     }
 
