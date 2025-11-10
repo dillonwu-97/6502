@@ -16,7 +16,8 @@ fn health_check() {
     cpu.reset();
 
 
-    const PATH: &str = "/home/darklaw/Desktop/6502-tests/65x02/6502/v1/00.json";
+    // const PATH: &str = "/home/darklaw/Desktop/6502-tests/65x02/6502/v1/00.json";
+    const PATH: &str = "/home/jinzo/Desktop/65x02/nes6502/v1/00.json";
     let file = File::open(PATH).expect("Unable to open file");
     let mut buf_reader = BufReader::new(file);
     let mut contents = String::new();
@@ -28,10 +29,10 @@ fn health_check() {
 
 fn check(cpu: &mut CPU, testcases: &Vec<TestCase>) -> Result<(), String> {
     cpu.reset();
-    for (i,tc) in testcases.iter().enumerate() {
+    for (_i,tc) in testcases.iter().enumerate() {
         cpu.update(tc.initial.pc, tc.initial.a, tc.initial.x, tc.initial.y, tc.initial.p, tc.initial.s);
         // this only checks the ram 
-        for (j, v) in tc.initial.ram.iter().enumerate() {
+        for (_j, v) in tc.initial.ram.iter().enumerate() {
             let (addr,val) = v;
             cpu.memory[ *addr ] = *val;
             // println!("Before *addr: {}, cpu val: {}", *addr, cpu.memory[*addr]);
@@ -39,17 +40,19 @@ fn check(cpu: &mut CPU, testcases: &Vec<TestCase>) -> Result<(), String> {
         cpu.execute();
 
         // Check everything include sp / pc
+        // left is correct, right is ours
         println!("{}, {}, {}, {}, {}, {}", cpu.pc, cpu.sp, cpu.ac, cpu.x, cpu.y, cpu.sr.bits());
-        assert_eq!(tc.r#final.pc, cpu.pc);
-        assert_eq!(tc.r#final.s, cpu.sp);
-        assert_eq!(tc.r#final.a, cpu.ac);
-        assert_eq!(tc.r#final.x, cpu.x);
-        assert_eq!(tc.r#final.y, cpu.y);
-        assert_eq!(tc.r#final.p, cpu.sr.bits());
-        for (j, v) in tc.r#final.ram.iter().enumerate() {
+        assert_eq!(tc.r#final.pc, cpu.pc, "program counter");
+        assert_eq!(tc.r#final.s, cpu.sp, "stack pointer");
+        assert_eq!(tc.r#final.a, cpu.ac, "accumulator");
+        assert_eq!(tc.r#final.x, cpu.x, "x register");
+        assert_eq!(tc.r#final.y, cpu.y, "y register");
+        assert_eq!(tc.r#final.p, cpu.sr.bits(), "status register"); // a lot more wrong after this assert statement
+                                                 // gets lifted
+        for (_j, v) in tc.r#final.ram.iter().enumerate() {
             let (addr, val) = v;
             // println!("After {}, {}, {}", *addr, cpu.memory[*addr], *val);
-            assert_eq!(cpu.memory[*addr], *val);
+            assert_eq!(cpu.memory[*addr], *val, "value on the stack");
             if cpu.memory[*addr] != *val {
                 return Err(format!("CPU Memory at addr:{}, {}; Expected val: {}", addr, cpu.memory[*addr], *val));
             }
@@ -64,11 +67,12 @@ fn check(cpu: &mut CPU, testcases: &Vec<TestCase>) -> Result<(), String> {
 // --nocapture --quiet 
 #[test]
 fn test_single() -> Result<(), String> {
-    let dirpath: String = "/home/darklaw/Desktop/6502-tests/65x02/6502/v1/".to_string();
+    // let dirpath: String = "/home/darklaw/Desktop/6502-tests/65x02/6502/v1/".to_string();
+    let dirpath: String = "/home/jinzo/Desktop/65x02/nes6502/v1/".to_string();
     let mut testcase: String = "00".to_string();
     match env::var("TESTCASE") {
         Ok(v) => {testcase = v},
-        Err(e) => {},
+        Err(_e) => {},
     }
     let filepath: String = dirpath + &testcase + ".json";
     let file = File::open(filepath).expect("Unable to open file");
@@ -78,11 +82,8 @@ fn test_single() -> Result<(), String> {
     let deserialized:Vec<TestCase> = serde_json::from_str(&content).unwrap();
     let mut cpu: CPU = CPU::new();
     if let Err(err) = check(&mut cpu, &deserialized) {
-        // eprintln!("deserialized: {:#?}", deserialized);
-        // eprintln!("Failed for opcode: {}", pathname);
         return Err(format!("Failure: {}", err));
     }
-
     // println!("{}", testfile);
     Ok(())
 }
@@ -103,7 +104,7 @@ fn test_single() -> Result<(), String> {
 //
 // TODO: double check the start of the stack, and specifically 08 opcode
 #[rstest]
-fn test_batch(#[files("../6502-tests/65x02/6502/v1/*.json")] path: PathBuf) -> Result<(), String> {
+fn test_batch(#[files("../65x02/nes6502/v1/*.json")] path: PathBuf) -> Result<(), String> {
     let pathname: String = path.clone().into_os_string().into_string().unwrap();
     let file = File::open(path).expect("Unable to open file");  
     let mut reader = BufReader::new(file);
