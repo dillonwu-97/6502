@@ -30,10 +30,14 @@ impl CPU {
         
         if (cur_val == 0) {
             self.set_status(StatusRegister::Z);
+        } else {
+            self.clear_status(StatusRegister::Z);
         }
 
         if (cur_val >> 7 == 1) {
             self.set_status(StatusRegister::N);
+        } else {
+            self.clear_status(StatusRegister::N);
         }
 
     }

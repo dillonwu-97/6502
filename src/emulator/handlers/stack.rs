@@ -3,6 +3,7 @@ use crate::emulator::CPU;
 use crate::emulator::cpu::StatusRegister;
 use crate::emulator::Inst;
 use bitflags::bitflags;
+use crate::emulator::cpu::B;
 
 impl CPU {
     // Set N/Z status for TSX and PLA instructions
@@ -27,18 +28,21 @@ impl CPU {
             }
             Inst::PHA => { // push accumulator
                 self.memory[ 0x100 + self.sp as usize ] = self.ac;
-                self.sp.wrapping_sub(1);
+                self.sp = self.sp.wrapping_sub(1);
             }
             Inst::PHP => { // push register status
+                // println!("PHP tested {}", self.sp);
                 self.set_status(StatusRegister::U);
-                self.set_status(StatusRegister::B);
-                self.memory[ 0x100 + self.sp as usize ] = self.sr.bits();
-                self.sp.wrapping_sub(1);
+                self.clear_status(StatusRegister::B);
+                // println!("status bits: {}", self.sr.bits());
+                self.memory[ 0x100 + self.sp as usize ] = (self.sr.bits() | B);
+                self.sp = self.sp.wrapping_sub(1);
+                println!("PHP tested {}", self.sp);
             }
             Inst::PLA => { // Pull accumulator from stack 
                 self.ac = self.memory[ 0x100 + self.sp as usize ];
                 self.nz_status(self.ac);
-                self.sp.wrapping_add(1); 
+                self.sp = self.sp.wrapping_add(1); 
             }
             Inst::PLP => { // pull processor status 
                 let status: u8 = self.memory[ 0x100 + self.sp as usize ];

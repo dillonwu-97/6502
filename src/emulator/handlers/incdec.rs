@@ -46,17 +46,5 @@ impl CPU {
 
         }
     }
-
-    // pub fn idc(&mut self, inst: Inst, mem_val: u8) -> u8 {
-    //     match inst {
-    //         Inst::INC => {
-    //             let temp: mut u8 = mem_val;
-    //             temp += 1;
-    //             return temp;
-    //         }
-    //         _=>{return 0;}
-    //     } 
-    //
-    // }
 }
 

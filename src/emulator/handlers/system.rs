@@ -2,8 +2,6 @@ use crate::emulator::CPU;
 use crate::emulator::Inst;
 use crate::emulator::cpu::StatusRegister;
 
-
-
 impl CPU {
     pub fn sys(&mut self, inst: Inst) {
         let mut pc_to_push: u16 = self.pc + 2;
@@ -21,15 +19,17 @@ impl CPU {
                 
                 // generate an interrupt request 
                 self.memory[ 0x100 + self.sp as usize] = (self.pc >> 8) as u8; // 2 bytes
-                self.sp.wrapping_sub(1);
+                self.sp = self.sp.wrapping_sub(1);
 
                 self.memory[ 0x100 + self.sp as usize] = (self.pc & 0xff) as u8;
-                self.sp.wrapping_sub(1);
+                self.sp = self.sp.wrapping_sub(1);
 
                 self.memory[ 0x100 + self.sp as usize] = self.sr.bits() as u8;
-                self.sp.wrapping_sub(1);
+                self.sp = self.sp.wrapping_sub(1);
 
-            }
+            },
+            Inst::NOP => {
+            },
             _ => return
         }
     }

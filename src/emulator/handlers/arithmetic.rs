@@ -16,9 +16,13 @@ impl CPU {
     fn cmp_status(&mut self, reg: u8, mem_val: u8) {
         if (reg >= mem_val) {
             self.set_status(StatusRegister::C);
+        } else {
+            self.clear_status(StatusRegister::C);
         }         
         if (reg == mem_val) {
             self.set_status(StatusRegister::Z);
+        } else {
+            self.clear_status(StatusRegister::Z);
         }
         // TODO: not sure what the expected behavior for this would be 
         // reg = 0x0, mem_val = 255 since 0 - 255 = 1 in the u8 space

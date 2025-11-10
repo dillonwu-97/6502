@@ -133,7 +133,7 @@ impl CPU {
     */
     pub fn imm(&mut self) -> usize {
         let ret = self.pc as usize;
-        self.pc += 1;
+        self.pc = self.pc.wrapping_add(1);
         return ret;
     }
 
@@ -376,10 +376,17 @@ impl CPU {
 
             Inst::BRK | Inst::NOP | Inst::RTI => {
                 self.sys(cur);
+                println!("{}", self.pc);
+                self.pc = self.pc.wrapping_add(1);
+                println!("{}", self.pc);
             }
 
             Inst::ILL => {
-                self.pc.wrapping_add(1);
+                // TODO: different illegal ops might have different behaviors, e.g. 02 vs 07 
+                // println!("hello {}", self.pc);
+                // self.pc = self.pc.wrapping_add(1);
+                self.pc = self.pc.wrapping_add(1);
+                // println!("hello {}", self.pc);
             }
 
             _ => {return; }
@@ -393,6 +400,8 @@ impl CPU {
     pub fn execute(&mut self) {
         // Need to return true / false for everything I think 
         // continue executing?
+        //
+        // self.clear_status(StatusRegister::U);
         let opcode = self.fetch_byte();
         self.handle_dispatch(opcode);
     }
