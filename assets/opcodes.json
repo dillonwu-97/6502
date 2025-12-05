@@ -1,0 +1,1794 @@
+[
+  {
+    "inst": "BRK",
+    "mode": "IMP",
+    "cycle_count": 7,
+    "opcode": "00",
+    "pagex": false
+  },
+  {
+    "inst": "ORA",
+    "mode": "IDX",
+    "cycle_count": 6,
+    "opcode": "01",
+    "pagex": false
+  },
+  {
+    "inst": "JAM",
+    "mode": "NA",
+    "cycle_count": 0,
+    "opcode": "02",
+    "pagex": false
+  },
+  {
+    "inst": "SLO",
+    "mode": "IDX",
+    "cycle_count": 8,
+    "opcode": "03",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "04",
+    "pagex": false
+  },
+  {
+    "inst": "ORA",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "05",
+    "pagex": false
+  },
+  {
+    "inst": "ASL",
+    "mode": "ZPG",
+    "cycle_count": 5,
+    "opcode": "06",
+    "pagex": false
+  },
+  {
+    "inst": "SLO",
+    "mode": "ZPG",
+    "cycle_count": 5,
+    "opcode": "07",
+    "pagex": false
+  },
+  {
+    "inst": "PHP",
+    "mode": "IMP",
+    "cycle_count": 3,
+    "opcode": "08",
+    "pagex": false
+  },
+  {
+    "inst": "ORA",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "09",
+    "pagex": false
+  },
+  {
+    "inst": "ASL",
+    "mode": "ACC",
+    "cycle_count": 2,
+    "opcode": "0A",
+    "pagex": false
+  },
+  {
+    "inst": "ANC",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "0B",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "ABS",
+    "cycle_count": 4,
+    "opcode": "0C",
+    "pagex": false
+  },
+  {
+    "inst": "ORA",
+    "mode": "ABS",
+    "cycle_count": 4,
+    "opcode": "0D",
+    "pagex": false
+  },
+  {
+    "inst": "ASL",
+    "mode": "ABS",
+    "cycle_count": 6,
+    "opcode": "0E",
+    "pagex": false
+  },
+  {
+    "inst": "SLO",
+    "mode": "ABS",
+    "cycle_count": 6,
+    "opcode": "0F",
+    "pagex": false
+  },
+  {
+    "inst": "BPL",
+    "mode": "REL",
+    "cycle_count": 2,
+    "opcode": "10",
+    "pagex": true
+  },
+  {
+    "inst": "ORA",
+    "mode": "INY",
+    "cycle_count": 5,
+    "opcode": "11",
+    "pagex": true
+  },
+  {
+    "inst": "JAM",
+    "mode": "NA",
+    "cycle_count": 0,
+    "opcode": "12",
+    "pagex": false
+  },
+  {
+    "inst": "SLO",
+    "mode": "INY",
+    "cycle_count": 8,
+    "opcode": "13",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "ZPX",
+    "cycle_count": 4,
+    "opcode": "14",
+    "pagex": false
+  },
+  {
+    "inst": "ORA",
+    "mode": "ZPX",
+    "cycle_count": 4,
+    "opcode": "15",
+    "pagex": false
+  },
+  {
+    "inst": "ASL",
+    "mode": "ZPX",
+    "cycle_count": 6,
+    "opcode": "16",
+    "pagex": false
+  },
+  {
+    "inst": "SLO",
+    "mode": "ZPX",
+    "cycle_count": 6,
+    "opcode": "17",
+    "pagex": false
+  },
+  {
+    "inst": "CLC",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "18",
+    "pagex": false
+  },
+  {
+    "inst": "ORA",
+    "mode": "ABY",
+    "cycle_count": 4,
+    "opcode": "19",
+    "pagex": true
+  },
+  {
+    "inst": "NOP",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "1A",
+    "pagex": false
+  },
+  {
+    "inst": "SLO",
+    "mode": "ABY",
+    "cycle_count": 7,
+    "opcode": "1B",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "ABX",
+    "cycle_count": 4,
+    "opcode": "1C",
+    "pagex": true
+  },
+  {
+    "inst": "ORA",
+    "mode": "ABX",
+    "cycle_count": 4,
+    "opcode": "1D",
+    "pagex": true
+  },
+  {
+    "inst": "ASL",
+    "mode": "ABX",
+    "cycle_count": 7,
+    "opcode": "1E",
+    "pagex": false
+  },
+  {
+    "inst": "SLO",
+    "mode": "ABX",
+    "cycle_count": 7,
+    "opcode": "1F",
+    "pagex": false
+  },
+  {
+    "inst": "JSR",
+    "mode": "ABS",
+    "cycle_count": 6,
+    "opcode": "20",
+    "pagex": false
+  },
+  {
+    "inst": "AND",
+    "mode": "IDX",
+    "cycle_count": 6,
+    "opcode": "21",
+    "pagex": false
+  },
+  {
+    "inst": "JAM",
+    "mode": "NA",
+    "cycle_count": 0,
+    "opcode": "22",
+    "pagex": false
+  },
+  {
+    "inst": "RLA",
+    "mode": "IDX",
+    "cycle_count": 8,
+    "opcode": "23",
+    "pagex": false
+  },
+  {
+    "inst": "BIT",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "24",
+    "pagex": false
+  },
+  {
+    "inst": "AND",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "25",
+    "pagex": false
+  },
+  {
+    "inst": "ROL",
+    "mode": "ZPG",
+    "cycle_count": 5,
+    "opcode": "26",
+    "pagex": false
+  },
+  {
+    "inst": "RLA",
+    "mode": "ZPG",
+    "cycle_count": 5,
+    "opcode": "27",
+    "pagex": false
+  },
+  {
+    "inst": "PLP",
+    "mode": "IMP",
+    "cycle_count": 4,
+    "opcode": "28",
+    "pagex": false
+  },
+  {
+    "inst": "AND",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "29",
+    "pagex": false
+  },
+  {
+    "inst": "ROL",
+    "mode": "ACC",
+    "cycle_count": 2,
+    "opcode": "2A",
+    "pagex": false
+  },
+  {
+    "inst": "ANC",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "2B",
+    "pagex": false
+  },
+  {
+    "inst": "BIT",
+    "mode": "ABS",
+    "cycle_count": 4,
+    "opcode": "2C",
+    "pagex": false
+  },
+  {
+    "inst": "AND",
+    "mode": "ABS",
+    "cycle_count": 4,
+    "opcode": "2D",
+    "pagex": false
+  },
+  {
+    "inst": "ROL",
+    "mode": "ABS",
+    "cycle_count": 6,
+    "opcode": "2E",
+    "pagex": false
+  },
+  {
+    "inst": "RLA",
+    "mode": "ABS",
+    "cycle_count": 6,
+    "opcode": "2F",
+    "pagex": false
+  },
+  {
+    "inst": "BMI",
+    "mode": "REL",
+    "cycle_count": 2,
+    "opcode": "30",
+    "pagex": true
+  },
+  {
+    "inst": "AND",
+    "mode": "INY",
+    "cycle_count": 5,
+    "opcode": "31",
+    "pagex": true
+  },
+  {
+    "inst": "JAM",
+    "mode": "NA",
+    "cycle_count": 0,
+    "opcode": "32",
+    "pagex": false
+  },
+  {
+    "inst": "RLA",
+    "mode": "INY",
+    "cycle_count": 8,
+    "opcode": "33",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "ZPX",
+    "cycle_count": 4,
+    "opcode": "34",
+    "pagex": false
+  },
+  {
+    "inst": "AND",
+    "mode": "ZPX",
+    "cycle_count": 4,
+    "opcode": "35",
+    "pagex": false
+  },
+  {
+    "inst": "ROL",
+    "mode": "ZPX",
+    "cycle_count": 6,
+    "opcode": "36",
+    "pagex": false
+  },
+  {
+    "inst": "RLA",
+    "mode": "ZPX",
+    "cycle_count": 6,
+    "opcode": "37",
+    "pagex": false
+  },
+  {
+    "inst": "SEC",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "38",
+    "pagex": false
+  },
+  {
+    "inst": "AND",
+    "mode": "ABY",
+    "cycle_count": 4,
+    "opcode": "39",
+    "pagex": true
+  },
+  {
+    "inst": "NOP",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "3A",
+    "pagex": false
+  },
+  {
+    "inst": "RLA",
+    "mode": "ABY",
+    "cycle_count": 7,
+    "opcode": "3B",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "ABX",
+    "cycle_count": 4,
+    "opcode": "3C",
+    "pagex": true
+  },
+  {
+    "inst": "AND",
+    "mode": "ABX",
+    "cycle_count": 4,
+    "opcode": "3D",
+    "pagex": true
+  },
+  {
+    "inst": "ROL",
+    "mode": "ABX",
+    "cycle_count": 7,
+    "opcode": "3E",
+    "pagex": false
+  },
+  {
+    "inst": "RLA",
+    "mode": "ABX",
+    "cycle_count": 7,
+    "opcode": "3F",
+    "pagex": false
+  },
+  {
+    "inst": "RTI",
+    "mode": "IMP",
+    "cycle_count": 6,
+    "opcode": "40",
+    "pagex": false
+  },
+  {
+    "inst": "EOR",
+    "mode": "IDX",
+    "cycle_count": 6,
+    "opcode": "41",
+    "pagex": false
+  },
+  {
+    "inst": "JAM",
+    "mode": "NA",
+    "cycle_count": 0,
+    "opcode": "42",
+    "pagex": false
+  },
+  {
+    "inst": "SRE",
+    "mode": "IDX",
+    "cycle_count": 8,
+    "opcode": "43",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "44",
+    "pagex": false
+  },
+  {
+    "inst": "EOR",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "45",
+    "pagex": false
+  },
+  {
+    "inst": "LSR",
+    "mode": "ZPG",
+    "cycle_count": 5,
+    "opcode": "46",
+    "pagex": false
+  },
+  {
+    "inst": "SRE",
+    "mode": "ZPG",
+    "cycle_count": 5,
+    "opcode": "47",
+    "pagex": false
+  },
+  {
+    "inst": "PHA",
+    "mode": "IMP",
+    "cycle_count": 3,
+    "opcode": "48",
+    "pagex": false
+  },
+  {
+    "inst": "EOR",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "49",
+    "pagex": false
+  },
+  {
+    "inst": "LSR",
+    "mode": "ACC",
+    "cycle_count": 2,
+    "opcode": "4A",
+    "pagex": false
+  },
+  {
+    "inst": "ALR",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "4B",
+    "pagex": false
+  },
+  {
+    "inst": "JMP",
+    "mode": "ABS",
+    "cycle_count": 3,
+    "opcode": "4C",
+    "pagex": false
+  },
+  {
+    "inst": "EOR",
+    "mode": "ABS",
+    "cycle_count": 4,
+    "opcode": "4D",
+    "pagex": false
+  },
+  {
+    "inst": "LSR",
+    "mode": "ABS",
+    "cycle_count": 6,
+    "opcode": "4E",
+    "pagex": false
+  },
+  {
+    "inst": "SRE",
+    "mode": "ABS",
+    "cycle_count": 6,
+    "opcode": "4F",
+    "pagex": false
+  },
+  {
+    "inst": "BVC",
+    "mode": "REL",
+    "cycle_count": 2,
+    "opcode": "50",
+    "pagex": true
+  },
+  {
+    "inst": "EOR",
+    "mode": "INY",
+    "cycle_count": 5,
+    "opcode": "51",
+    "pagex": true
+  },
+  {
+    "inst": "JAM",
+    "mode": "NA",
+    "cycle_count": 0,
+    "opcode": "52",
+    "pagex": false
+  },
+  {
+    "inst": "SRE",
+    "mode": "INY",
+    "cycle_count": 8,
+    "opcode": "53",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "ZPX",
+    "cycle_count": 4,
+    "opcode": "54",
+    "pagex": false
+  },
+  {
+    "inst": "EOR",
+    "mode": "ZPX",
+    "cycle_count": 4,
+    "opcode": "55",
+    "pagex": false
+  },
+  {
+    "inst": "LSR",
+    "mode": "ZPX",
+    "cycle_count": 6,
+    "opcode": "56",
+    "pagex": false
+  },
+  {
+    "inst": "SRE",
+    "mode": "ZPX",
+    "cycle_count": 6,
+    "opcode": "57",
+    "pagex": false
+  },
+  {
+    "inst": "CLI",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "58",
+    "pagex": false
+  },
+  {
+    "inst": "EOR",
+    "mode": "ABY",
+    "cycle_count": 4,
+    "opcode": "59",
+    "pagex": true
+  },
+  {
+    "inst": "NOP",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "5A",
+    "pagex": false
+  },
+  {
+    "inst": "SRE",
+    "mode": "ABY",
+    "cycle_count": 7,
+    "opcode": "5B",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "ABX",
+    "cycle_count": 4,
+    "opcode": "5C",
+    "pagex": true
+  },
+  {
+    "inst": "EOR",
+    "mode": "ABX",
+    "cycle_count": 4,
+    "opcode": "5D",
+    "pagex": true
+  },
+  {
+    "inst": "LSR",
+    "mode": "ABX",
+    "cycle_count": 7,
+    "opcode": "5E",
+    "pagex": false
+  },
+  {
+    "inst": "SRE",
+    "mode": "ABX",
+    "cycle_count": 7,
+    "opcode": "5F",
+    "pagex": false
+  },
+  {
+    "inst": "RTS",
+    "mode": "IMP",
+    "cycle_count": 6,
+    "opcode": "60",
+    "pagex": false
+  },
+  {
+    "inst": "ADC",
+    "mode": "IDX",
+    "cycle_count": 6,
+    "opcode": "61",
+    "pagex": false
+  },
+  {
+    "inst": "JAM",
+    "mode": "NA",
+    "cycle_count": 0,
+    "opcode": "62",
+    "pagex": false
+  },
+  {
+    "inst": "RRA",
+    "mode": "IDX",
+    "cycle_count": 8,
+    "opcode": "63",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "64",
+    "pagex": false
+  },
+  {
+    "inst": "ADC",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "65",
+    "pagex": false
+  },
+  {
+    "inst": "ROR",
+    "mode": "ZPG",
+    "cycle_count": 5,
+    "opcode": "66",
+    "pagex": false
+  },
+  {
+    "inst": "RRA",
+    "mode": "ZPG",
+    "cycle_count": 5,
+    "opcode": "67",
+    "pagex": false
+  },
+  {
+    "inst": "PLA",
+    "mode": "IMP",
+    "cycle_count": 4,
+    "opcode": "68",
+    "pagex": false
+  },
+  {
+    "inst": "ADC",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "69",
+    "pagex": false
+  },
+  {
+    "inst": "ROR",
+    "mode": "ACC",
+    "cycle_count": 2,
+    "opcode": "6A",
+    "pagex": false
+  },
+  {
+    "inst": "ARR",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "6B",
+    "pagex": false
+  },
+  {
+    "inst": "JMP",
+    "mode": "IND",
+    "cycle_count": 5,
+    "opcode": "6C",
+    "pagex": false
+  },
+  {
+    "inst": "ADC",
+    "mode": "ABS",
+    "cycle_count": 4,
+    "opcode": "6D",
+    "pagex": false
+  },
+  {
+    "inst": "ROR",
+    "mode": "ABS",
+    "cycle_count": 6,
+    "opcode": "6E",
+    "pagex": false
+  },
+  {
+    "inst": "RRA",
+    "mode": "ABS",
+    "cycle_count": 6,
+    "opcode": "6F",
+    "pagex": false
+  },
+  {
+    "inst": "BVS",
+    "mode": "REL",
+    "cycle_count": 2,
+    "opcode": "70",
+    "pagex": true
+  },
+  {
+    "inst": "ADC",
+    "mode": "INY",
+    "cycle_count": 5,
+    "opcode": "71",
+    "pagex": true
+  },
+  {
+    "inst": "JAM",
+    "mode": "NA",
+    "cycle_count": 0,
+    "opcode": "72",
+    "pagex": false
+  },
+  {
+    "inst": "RRA",
+    "mode": "INY",
+    "cycle_count": 8,
+    "opcode": "73",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "ZPX",
+    "cycle_count": 4,
+    "opcode": "74",
+    "pagex": false
+  },
+  {
+    "inst": "ADC",
+    "mode": "ZPX",
+    "cycle_count": 4,
+    "opcode": "75",
+    "pagex": false
+  },
+  {
+    "inst": "ROR",
+    "mode": "ZPX",
+    "cycle_count": 6,
+    "opcode": "76",
+    "pagex": false
+  },
+  {
+    "inst": "RRA",
+    "mode": "ZPX",
+    "cycle_count": 6,
+    "opcode": "77",
+    "pagex": false
+  },
+  {
+    "inst": "SEI",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "78",
+    "pagex": false
+  },
+  {
+    "inst": "ADC",
+    "mode": "ABY",
+    "cycle_count": 4,
+    "opcode": "79",
+    "pagex": true
+  },
+  {
+    "inst": "NOP",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "7A",
+    "pagex": false
+  },
+  {
+    "inst": "RRA",
+    "mode": "ABY",
+    "cycle_count": 7,
+    "opcode": "7B",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "ABX",
+    "cycle_count": 4,
+    "opcode": "7C",
+    "pagex": true
+  },
+  {
+    "inst": "ADC",
+    "mode": "ABX",
+    "cycle_count": 4,
+    "opcode": "7D",
+    "pagex": true
+  },
+  {
+    "inst": "ROR",
+    "mode": "ABX",
+    "cycle_count": 7,
+    "opcode": "7E",
+    "pagex": false
+  },
+  {
+    "inst": "RRA",
+    "mode": "ABX",
+    "cycle_count": 7,
+    "opcode": "7F",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "80",
+    "pagex": false
+  },
+  {
+    "inst": "STA",
+    "mode": "IDX",
+    "cycle_count": 6,
+    "opcode": "81",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "82",
+    "pagex": false
+  },
+  {
+    "inst": "SAX",
+    "mode": "IDX",
+    "cycle_count": 6,
+    "opcode": "83",
+    "pagex": false
+  },
+  {
+    "inst": "STY",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "84",
+    "pagex": false
+  },
+  {
+    "inst": "STA",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "85",
+    "pagex": false
+  },
+  {
+    "inst": "STX",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "86",
+    "pagex": false
+  },
+  {
+    "inst": "SAX",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "87",
+    "pagex": false
+  },
+  {
+    "inst": "DEY",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "88",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "89",
+    "pagex": false
+  },
+  {
+    "inst": "TXA",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "8A",
+    "pagex": false
+  },
+  {
+    "inst": "ANE",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "8B",
+    "pagex": false
+  },
+  {
+    "inst": "STY",
+    "mode": "ABS",
+    "cycle_count": 4,
+    "opcode": "8C",
+    "pagex": false
+  },
+  {
+    "inst": "STA",
+    "mode": "ABS",
+    "cycle_count": 4,
+    "opcode": "8D",
+    "pagex": false
+  },
+  {
+    "inst": "STX",
+    "mode": "ABS",
+    "cycle_count": 4,
+    "opcode": "8E",
+    "pagex": false
+  },
+  {
+    "inst": "SAX",
+    "mode": "ABS",
+    "cycle_count": 4,
+    "opcode": "8F",
+    "pagex": false
+  },
+  {
+    "inst": "BCC",
+    "mode": "REL",
+    "cycle_count": 2,
+    "opcode": "90",
+    "pagex": true
+  },
+  {
+    "inst": "STA",
+    "mode": "INY",
+    "cycle_count": 6,
+    "opcode": "91",
+    "pagex": false
+  },
+  {
+    "inst": "JAM",
+    "mode": "NA",
+    "cycle_count": 0,
+    "opcode": "92",
+    "pagex": false
+  },
+  {
+    "inst": "SHA",
+    "mode": "INY",
+    "cycle_count": 6,
+    "opcode": "93",
+    "pagex": false
+  },
+  {
+    "inst": "STY",
+    "mode": "ZPX",
+    "cycle_count": 4,
+    "opcode": "94",
+    "pagex": false
+  },
+  {
+    "inst": "STA",
+    "mode": "ZPX",
+    "cycle_count": 4,
+    "opcode": "95",
+    "pagex": false
+  },
+  {
+    "inst": "STX",
+    "mode": "ZPY",
+    "cycle_count": 4,
+    "opcode": "96",
+    "pagex": false
+  },
+  {
+    "inst": "SAX",
+    "mode": "ZPY",
+    "cycle_count": 4,
+    "opcode": "97",
+    "pagex": false
+  },
+  {
+    "inst": "TYA",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "98",
+    "pagex": false
+  },
+  {
+    "inst": "STA",
+    "mode": "ABY",
+    "cycle_count": 5,
+    "opcode": "99",
+    "pagex": false
+  },
+  {
+    "inst": "TXS",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "9A",
+    "pagex": false
+  },
+  {
+    "inst": "TAS",
+    "mode": "ABY",
+    "cycle_count": 5,
+    "opcode": "9B",
+    "pagex": false
+  },
+  {
+    "inst": "SHY",
+    "mode": "ABX",
+    "cycle_count": 5,
+    "opcode": "9C",
+    "pagex": false
+  },
+  {
+    "inst": "STA",
+    "mode": "ABX",
+    "cycle_count": 5,
+    "opcode": "9D",
+    "pagex": false
+  },
+  {
+    "inst": "SHX",
+    "mode": "ABY",
+    "cycle_count": 5,
+    "opcode": "9E",
+    "pagex": false
+  },
+  {
+    "inst": "SHA",
+    "mode": "ABY",
+    "cycle_count": 5,
+    "opcode": "9F",
+    "pagex": false
+  },
+  {
+    "inst": "LDY",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "A0",
+    "pagex": false
+  },
+  {
+    "inst": "LDA",
+    "mode": "IDX",
+    "cycle_count": 6,
+    "opcode": "A1",
+    "pagex": false
+  },
+  {
+    "inst": "LDX",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "A2",
+    "pagex": false
+  },
+  {
+    "inst": "LAX",
+    "mode": "IDX",
+    "cycle_count": 6,
+    "opcode": "A3",
+    "pagex": false
+  },
+  {
+    "inst": "LDY",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "A4",
+    "pagex": false
+  },
+  {
+    "inst": "LDA",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "A5",
+    "pagex": false
+  },
+  {
+    "inst": "LDX",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "A6",
+    "pagex": false
+  },
+  {
+    "inst": "LAX",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "A7",
+    "pagex": false
+  },
+  {
+    "inst": "TAY",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "A8",
+    "pagex": false
+  },
+  {
+    "inst": "LDA",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "A9",
+    "pagex": false
+  },
+  {
+    "inst": "TAX",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "AA",
+    "pagex": false
+  },
+  {
+    "inst": "LXA",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "AB",
+    "pagex": false
+  },
+  {
+    "inst": "LDY",
+    "mode": "ABS",
+    "cycle_count": 4,
+    "opcode": "AC",
+    "pagex": false
+  },
+  {
+    "inst": "LDA",
+    "mode": "ABS",
+    "cycle_count": 4,
+    "opcode": "AD",
+    "pagex": false
+  },
+  {
+    "inst": "LDX",
+    "mode": "ABS",
+    "cycle_count": 4,
+    "opcode": "AE",
+    "pagex": false
+  },
+  {
+    "inst": "LAX",
+    "mode": "ABS",
+    "cycle_count": 4,
+    "opcode": "AF",
+    "pagex": false
+  },
+  {
+    "inst": "BCS",
+    "mode": "REL",
+    "cycle_count": 2,
+    "opcode": "B0",
+    "pagex": true
+  },
+  {
+    "inst": "LDA",
+    "mode": "INY",
+    "cycle_count": 5,
+    "opcode": "B1",
+    "pagex": true
+  },
+  {
+    "inst": "JAM",
+    "mode": "NA",
+    "cycle_count": 0,
+    "opcode": "B2",
+    "pagex": false
+  },
+  {
+    "inst": "LAX",
+    "mode": "INY",
+    "cycle_count": 5,
+    "opcode": "B3",
+    "pagex": true
+  },
+  {
+    "inst": "LDY",
+    "mode": "ZPX",
+    "cycle_count": 4,
+    "opcode": "B4",
+    "pagex": false
+  },
+  {
+    "inst": "LDA",
+    "mode": "ZPX",
+    "cycle_count": 4,
+    "opcode": "B5",
+    "pagex": false
+  },
+  {
+    "inst": "LDX",
+    "mode": "ZPY",
+    "cycle_count": 4,
+    "opcode": "B6",
+    "pagex": false
+  },
+  {
+    "inst": "LAX",
+    "mode": "ZPY",
+    "cycle_count": 4,
+    "opcode": "B7",
+    "pagex": false
+  },
+  {
+    "inst": "CLV",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "B8",
+    "pagex": false
+  },
+  {
+    "inst": "LDA",
+    "mode": "ABY",
+    "cycle_count": 4,
+    "opcode": "B9",
+    "pagex": true
+  },
+  {
+    "inst": "TSX",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "BA",
+    "pagex": false
+  },
+  {
+    "inst": "LAS",
+    "mode": "ABY",
+    "cycle_count": 4,
+    "opcode": "BB",
+    "pagex": true
+  },
+  {
+    "inst": "LDY",
+    "mode": "ABX",
+    "cycle_count": 4,
+    "opcode": "BC",
+    "pagex": true
+  },
+  {
+    "inst": "LDA",
+    "mode": "ABX",
+    "cycle_count": 4,
+    "opcode": "BD",
+    "pagex": true
+  },
+  {
+    "inst": "LDX",
+    "mode": "ABY",
+    "cycle_count": 4,
+    "opcode": "BE",
+    "pagex": true
+  },
+  {
+    "inst": "LAX",
+    "mode": "ABY",
+    "cycle_count": 4,
+    "opcode": "BF",
+    "pagex": true
+  },
+  {
+    "inst": "CPY",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "C0",
+    "pagex": false
+  },
+  {
+    "inst": "CMP",
+    "mode": "IDX",
+    "cycle_count": 6,
+    "opcode": "C1",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "C2",
+    "pagex": false
+  },
+  {
+    "inst": "DCP",
+    "mode": "IDX",
+    "cycle_count": 8,
+    "opcode": "C3",
+    "pagex": false
+  },
+  {
+    "inst": "CPY",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "C4",
+    "pagex": false
+  },
+  {
+    "inst": "CMP",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "C5",
+    "pagex": false
+  },
+  {
+    "inst": "DEC",
+    "mode": "ZPG",
+    "cycle_count": 5,
+    "opcode": "C6",
+    "pagex": false
+  },
+  {
+    "inst": "DCP",
+    "mode": "ZPG",
+    "cycle_count": 5,
+    "opcode": "C7",
+    "pagex": false
+  },
+  {
+    "inst": "INY",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "C8",
+    "pagex": false
+  },
+  {
+    "inst": "CMP",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "C9",
+    "pagex": false
+  },
+  {
+    "inst": "DEX",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "CA",
+    "pagex": false
+  },
+  {
+    "inst": "SBX",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "CB",
+    "pagex": false
+  },
+  {
+    "inst": "CPY",
+    "mode": "ABS",
+    "cycle_count": 4,
+    "opcode": "CC",
+    "pagex": false
+  },
+  {
+    "inst": "CMP",
+    "mode": "ABS",
+    "cycle_count": 4,
+    "opcode": "CD",
+    "pagex": false
+  },
+  {
+    "inst": "DEC",
+    "mode": "ABS",
+    "cycle_count": 6,
+    "opcode": "CE",
+    "pagex": false
+  },
+  {
+    "inst": "DCP",
+    "mode": "ABS",
+    "cycle_count": 6,
+    "opcode": "CF",
+    "pagex": false
+  },
+  {
+    "inst": "BNE",
+    "mode": "REL",
+    "cycle_count": 2,
+    "opcode": "D0",
+    "pagex": true
+  },
+  {
+    "inst": "CMP",
+    "mode": "INY",
+    "cycle_count": 5,
+    "opcode": "D1",
+    "pagex": true
+  },
+  {
+    "inst": "JAM",
+    "mode": "NA",
+    "cycle_count": 0,
+    "opcode": "D2",
+    "pagex": false
+  },
+  {
+    "inst": "DCP",
+    "mode": "INY",
+    "cycle_count": 8,
+    "opcode": "D3",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "ZPX",
+    "cycle_count": 4,
+    "opcode": "D4",
+    "pagex": false
+  },
+  {
+    "inst": "CMP",
+    "mode": "ZPX",
+    "cycle_count": 4,
+    "opcode": "D5",
+    "pagex": false
+  },
+  {
+    "inst": "DEC",
+    "mode": "ZPX",
+    "cycle_count": 6,
+    "opcode": "D6",
+    "pagex": false
+  },
+  {
+    "inst": "DCP",
+    "mode": "ZPX",
+    "cycle_count": 6,
+    "opcode": "D7",
+    "pagex": false
+  },
+  {
+    "inst": "CLD",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "D8",
+    "pagex": false
+  },
+  {
+    "inst": "CMP",
+    "mode": "ABY",
+    "cycle_count": 4,
+    "opcode": "D9",
+    "pagex": true
+  },
+  {
+    "inst": "NOP",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "DA",
+    "pagex": false
+  },
+  {
+    "inst": "DCP",
+    "mode": "ABY",
+    "cycle_count": 7,
+    "opcode": "DB",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "ABX",
+    "cycle_count": 4,
+    "opcode": "DC",
+    "pagex": true
+  },
+  {
+    "inst": "CMP",
+    "mode": "ABX",
+    "cycle_count": 4,
+    "opcode": "DD",
+    "pagex": true
+  },
+  {
+    "inst": "DEC",
+    "mode": "ABX",
+    "cycle_count": 7,
+    "opcode": "DE",
+    "pagex": false
+  },
+  {
+    "inst": "DCP",
+    "mode": "ABX",
+    "cycle_count": 7,
+    "opcode": "DF",
+    "pagex": false
+  },
+  {
+    "inst": "CPX",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "E0",
+    "pagex": false
+  },
+  {
+    "inst": "SBC",
+    "mode": "IDX",
+    "cycle_count": 6,
+    "opcode": "E1",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "E2",
+    "pagex": false
+  },
+  {
+    "inst": "ISC",
+    "mode": "IDX",
+    "cycle_count": 8,
+    "opcode": "E3",
+    "pagex": false
+  },
+  {
+    "inst": "CPX",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "E4",
+    "pagex": false
+  },
+  {
+    "inst": "SBC",
+    "mode": "ZPG",
+    "cycle_count": 3,
+    "opcode": "E5",
+    "pagex": false
+  },
+  {
+    "inst": "INC",
+    "mode": "ZPG",
+    "cycle_count": 5,
+    "opcode": "E6",
+    "pagex": false
+  },
+  {
+    "inst": "ISC",
+    "mode": "ZPG",
+    "cycle_count": 5,
+    "opcode": "E7",
+    "pagex": false
+  },
+  {
+    "inst": "INX",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "E8",
+    "pagex": false
+  },
+  {
+    "inst": "SBC",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "E9",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "EA",
+    "pagex": false
+  },
+  {
+    "inst": "USBC",
+    "mode": "IMM",
+    "cycle_count": 2,
+    "opcode": "EB",
+    "pagex": false
+  },
+  {
+    "inst": "CPX",
+    "mode": "ABS",
+    "cycle_count": 4,
+    "opcode": "EC",
+    "pagex": false
+  },
+  {
+    "inst": "SBC",
+    "mode": "ABS",
+    "cycle_count": 4,
+    "opcode": "ED",
+    "pagex": false
+  },
+  {
+    "inst": "INC",
+    "mode": "ABS",
+    "cycle_count": 6,
+    "opcode": "EE",
+    "pagex": false
+  },
+  {
+    "inst": "ISC",
+    "mode": "ABS",
+    "cycle_count": 6,
+    "opcode": "EF",
+    "pagex": false
+  },
+  {
+    "inst": "BEQ",
+    "mode": "REL",
+    "cycle_count": 2,
+    "opcode": "F0",
+    "pagex": true
+  },
+  {
+    "inst": "SBC",
+    "mode": "INY",
+    "cycle_count": 5,
+    "opcode": "F1",
+    "pagex": true
+  },
+  {
+    "inst": "JAM",
+    "mode": "NA",
+    "cycle_count": 0,
+    "opcode": "F2",
+    "pagex": false
+  },
+  {
+    "inst": "ISC",
+    "mode": "INY",
+    "cycle_count": 8,
+    "opcode": "F3",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "ZPX",
+    "cycle_count": 4,
+    "opcode": "F4",
+    "pagex": false
+  },
+  {
+    "inst": "SBC",
+    "mode": "ZPX",
+    "cycle_count": 4,
+    "opcode": "F5",
+    "pagex": false
+  },
+  {
+    "inst": "INC",
+    "mode": "ZPX",
+    "cycle_count": 6,
+    "opcode": "F6",
+    "pagex": false
+  },
+  {
+    "inst": "ISC",
+    "mode": "ZPX",
+    "cycle_count": 6,
+    "opcode": "F7",
+    "pagex": false
+  },
+  {
+    "inst": "SED",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "F8",
+    "pagex": false
+  },
+  {
+    "inst": "SBC",
+    "mode": "ABY",
+    "cycle_count": 4,
+    "opcode": "F9",
+    "pagex": true
+  },
+  {
+    "inst": "NOP",
+    "mode": "IMP",
+    "cycle_count": 2,
+    "opcode": "FA",
+    "pagex": false
+  },
+  {
+    "inst": "ISC",
+    "mode": "ABY",
+    "cycle_count": 7,
+    "opcode": "FB",
+    "pagex": false
+  },
+  {
+    "inst": "NOP",
+    "mode": "ABX",
+    "cycle_count": 4,
+    "opcode": "FC",
+    "pagex": true
+  },
+  {
+    "inst": "SBC",
+    "mode": "ABX",
+    "cycle_count": 4,
+    "opcode": "FD",
+    "pagex": true
+  },
+  {
+    "inst": "INC",
+    "mode": "ABX",
+    "cycle_count": 7,
+    "opcode": "FE",
+    "pagex": false
+  },
+  {
+    "inst": "ISC",
+    "mode": "ABX",
+    "cycle_count": 7,
+    "opcode": "FF",
+    "pagex": false
+  }
+]
