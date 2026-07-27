@@ -26,6 +26,7 @@ pub const N: u8 = 1 << 7;
 // I wonder if there is a better way to do this or nah 
 pub const MEMSIZE: usize = 2 << 16;
 bitflags! {
+    #[derive(Clone)]
     pub struct StatusRegister: u8 {
         const C = C; // carry
         const Z = Z; // zero
@@ -72,6 +73,18 @@ impl CPU {
             boundary_flag: false
         }
     }
+
+    pub fn debug(&mut self) {
+        println!("Ram");
+        for (idx, v) in self.memory.iter().enumerate() {
+            if (*v != 0x0) {
+                println!("{}: {}", idx, v);
+            }
+        }
+        println!("Status register: {}", self.sr.bits());
+
+        println!("Finish debug");
+    }
     
     pub fn reset(&mut self) {
         // Reset the CPU
@@ -110,7 +123,12 @@ impl CPU {
 
     pub fn fetch_byte(&mut self) -> u8 {
         let byte = self.memory[self.pc as usize];
-        self.pc = self.pc.wrapping_add(1);
+        let cur: Inst = self.optable[byte as usize].inst;
+        if cur == Inst::ILL {
+            println!("Illegal opcode");
+        } else {
+            self.pc = self.pc.wrapping_add(1);
+        }
         byte 
     }
 
@@ -272,6 +290,7 @@ impl CPU {
     }
 
     pub fn handle_dispatch(&mut self, op: u8) {
+
         let cur: Inst = self.optable[op as usize].inst;
         self.cycle_count += self.optable[op as usize].cycle as u64;
         match cur {
@@ -376,19 +395,13 @@ impl CPU {
 
             Inst::BRK | Inst::NOP | Inst::RTI => {
                 self.sys(cur);
-                println!("{}", self.pc);
-                self.pc = self.pc.wrapping_add(1);
-                println!("{}", self.pc);
+                self.debug();
             }
 
             Inst::ILL => {
                 // TODO: different illegal ops might have different behaviors, e.g. 02 vs 07 
-                // println!("hello {}", self.pc);
-                // self.pc = self.pc.wrapping_add(1);
                 self.pc = self.pc.wrapping_add(1);
-                // println!("hello {}", self.pc);
             }
-
             _ => {return; }
         }
         self.boundary_flag = false;
@@ -404,5 +417,6 @@ impl CPU {
         // self.clear_status(StatusRegister::U);
         let opcode = self.fetch_byte();
         self.handle_dispatch(opcode);
+
     }
 }
