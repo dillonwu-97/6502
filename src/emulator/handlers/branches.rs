@@ -31,11 +31,11 @@ impl CPU {
         if table[&inst] {
             self.pc = new_pc; // the edge case is if we need to wrap back around
             // in the subtraction
-            self.cycle_count += 1;
+            self.cycle += 1;
             status_flag = true;
         } 
         if status_flag && self.check_boundary(orig_pc, new_pc) {
-            self.cycle_count += 1;
+            self.cycle += 1;
         }
     }
 }

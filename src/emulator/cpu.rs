@@ -48,7 +48,7 @@ pub struct CPU {
     pub sr: StatusRegister, // bitfield for the status bits
     pub sp: u8,
     pub optable: Vec<OpWrapper>,
-    pub cycle_count: u64,
+    pub cycle: u64,
     pub boundary_flag: bool, // page boundary bit that gets set when we cross a page boundary
 }
 
@@ -69,7 +69,7 @@ impl CPU {
             pc: 0, ac: 0, x: 0, y: 0, sr: StatusRegister::empty(), sp: 0xff, 
             memory: [0; MEMSIZE],
             optable: op_vec,
-            cycle_count: 0,
+            cycle: 0,
             boundary_flag: false
         }
     }
@@ -86,6 +86,7 @@ impl CPU {
         println!("Finish debug");
     }
     
+    // reset CPU
     pub fn reset(&mut self) {
         // Reset the CPU
         self.pc = 0;
@@ -97,18 +98,16 @@ impl CPU {
         self.memory = [0; MEMSIZE];
     }
 
+    // Update all registers
     pub fn update(&mut self, pc: u16, ac: u8, x: u8, y: u8, sr: u8, sp: u8) {
         self.pc = pc;
         self.ac = ac;
         self.x = x;
         self.y = y;
-        // println!("value as u8: {}", sr);
-        self.sr = StatusRegister::from_bits_truncate(sr); // ignore the invalid bits, but not sure
-        // if this is the right way
+        self.sr = StatusRegister::from_bits_truncate(sr); 
         self.sp = sp;
     }
 
-    // TODO: should these implementations be somewhere else?
     pub fn set_status(&mut self, flag: StatusRegister) {
         self.sr.insert(flag);
     }
@@ -121,8 +120,24 @@ impl CPU {
         self.sr.contains(flag)
     }
 
-    pub fn fetch_byte(&mut self) -> u8 {
-        let byte = self.memory[self.pc as usize];
+    // Atomic fetch operations that affect cycles
+    pub fn fetch_byte(&mut self, addr: usize) -> u8 {
+        self.cycle += 1;
+        let byte = self.memory[addr];
+        byte
+    } 
+
+    pub fn write_byte(&mut self, addr: usize, val: u8) {
+        self.cycle += 1;
+        self.memory[addr] = val;
+    }
+
+
+    // returns opcode as a u8
+    pub fn fetch_opcode(&mut self) -> u8 {
+        // let byte = self.memory[self.pc as usize];
+        // Need to change opcode fetch from u8 -> Opcode 
+        let byte = self.fetch_byte(self.pc as usize);
         let cur: Inst = self.optable[byte as usize].inst;
         if cur == Inst::ILL {
             println!("Illegal opcode");
@@ -133,12 +148,13 @@ impl CPU {
     }
 
     pub fn fetch_two(&mut self) -> u16 {
-        let lower = self.fetch_byte() as u16;
-        let upper = self.fetch_byte() as u16;
+        let lower = self.fetch_opcode() as u16;
+        let upper = self.fetch_opcode() as u16;
         let value = lower + (upper << 8);
         return value;
     }
 
+    
     // All addressing mode functions should be returning some memory address to be used
     // Branch instructions are all relative so REL is not handled
     
@@ -171,14 +187,14 @@ impl CPU {
     * Returns reference to memory 
     */
     pub fn zpg(&mut self) -> usize {
-        return self.fetch_byte() as usize;
+        return self.fetch_opcode() as usize;
     }
 
     /* 
     * Zero Page, X addressing mode
     */
     pub fn zpx(&mut self) -> usize {
-        return self.fetch_byte().wrapping_add( self.x as u8) as usize;
+        return self.fetch_opcode().wrapping_add( self.x as u8) as usize;
     }
 
     /* 
@@ -186,7 +202,7 @@ impl CPU {
     */
     pub fn zpy(&mut self) -> usize {
         // TODO: check if page boundary has been crossed
-        return self.fetch_byte().wrapping_add( self.y as u8) as usize;
+        return self.fetch_opcode().wrapping_add( self.y as u8) as usize;
     }
 
     /*
@@ -195,7 +211,7 @@ impl CPU {
     * Returns a value from -128 -> 127 as usize
     */
     pub fn rel(&mut self) -> usize {
-        return self.fetch_byte() as usize;
+        return self.fetch_opcode() as usize;
     }
 
     /*
@@ -230,8 +246,8 @@ impl CPU {
     // The next byte afterwards is the upper byte of the jump address
     // TODO: check the pc count for this
     pub fn ind(&mut self) -> usize {
-        let lower = self.fetch_byte() as u16;   
-        let upper = self.fetch_byte() as u16;
+        let lower = self.fetch_opcode() as u16;   
+        let upper = self.fetch_opcode() as u16;
         let jmp_addr = lower + (upper << 8);
         return jmp_addr as usize;
     }
@@ -242,7 +258,7 @@ impl CPU {
     // TODO: add a test case that handles the edge case
     // need to fix this
     pub fn idx(&mut self) -> usize {
-        let zp_addr = self.fetch_byte().wrapping_add(self.x);  // zero page addr
+        let zp_addr = self.fetch_opcode().wrapping_add(self.x);  // zero page addr
         let lower = self.memory[ zp_addr as usize ] as u16;
         let upper = self.memory[ zp_addr.wrapping_add(0x1) as usize ] as u16;
         let addr = (upper << 0x8) + lower;
@@ -253,7 +269,7 @@ impl CPU {
     * https://stackoverflow.com/questions/46262435/indirect-y-indexed-addressing-mode-in-mos-6502
     */
     pub fn idy(&mut self) -> usize {
-        let zpg_addr = self.fetch_byte();
+        let zpg_addr = self.fetch_opcode();
         let mut lower = self.memory[ zpg_addr as usize ] as u16;
         let mut upper = self.memory[ zpg_addr.wrapping_add(0x01) as usize ] as u16; // wrapping add
         // for the next mem location to read the high byte
@@ -292,7 +308,8 @@ impl CPU {
     pub fn handle_dispatch(&mut self, op: u8) {
 
         let cur: Inst = self.optable[op as usize].inst;
-        self.cycle_count += self.optable[op as usize].cycle as u64;
+        // replace this with actual cycle modification
+        // self.cycle_count += self.optable[op as usize].cycle as u64;
         match cur {
             // Load operations
             Inst::LDA | Inst::LDX | Inst::LDY => {
@@ -300,7 +317,7 @@ impl CPU {
                 let mem_val = self.memory[idx];
                 self.ld(cur, mem_val);
                 if (self.boundary_flag) {
-                    self.cycle_count +=1;
+                    self.cycle +=1;
                 }
             }
 
@@ -308,8 +325,7 @@ impl CPU {
             Inst::STA | Inst::STX | Inst::STY => {
                 let to_store = self.st(cur);
                 let idx: usize = self.addr_mode_handler(op);
-                self.memory[idx] = to_store;
-
+                self.write_byte(idx, to_store);
             }
 
             // Register Transfers
@@ -332,7 +348,7 @@ impl CPU {
                 let mem_val = self.memory[idx];
                 self.log(cur, mem_val);
                 if (self.boundary_flag) {
-                    self.cycle_count += 1;
+                    self.cycle += 1;
                 }
             }
 
@@ -343,7 +359,7 @@ impl CPU {
                 let mem_val: u8 = self.memory[idx];
                 self.ath(cur, mem_val);
                 if (self.boundary_flag) { // set in the address mode handler
-                    self.cycle_count += 1;
+                    self.cycle += 1;
                 }
             }
             
@@ -415,7 +431,7 @@ impl CPU {
         // continue executing?
         //
         // self.clear_status(StatusRegister::U);
-        let opcode = self.fetch_byte();
+        let opcode = self.fetch_opcode();
         self.handle_dispatch(opcode);
 
     }
