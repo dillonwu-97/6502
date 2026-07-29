@@ -499,6 +499,8 @@ impl From<u8> for Opcode {
     } 
 }
 
+
+ #[derive(Clone)]
 pub struct OpWrapper {
     pub op: Opcode, // TODO: i dont think this is needed because we can do a conversion from the u8 value
     pub inst: Inst,

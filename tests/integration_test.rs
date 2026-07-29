@@ -68,7 +68,7 @@ fn check(cpu: &mut CPU, testcases: &Vec<TestCase>) -> Result<(), String> {
 #[test]
 fn test_single() -> Result<(), String> {
     // let dirpath: String = "/home/darklaw/Desktop/6502-tests/65x02/6502/v1/".to_string();
-    let dirpath: String = "/home/jinzo/Desktop/65x02/nes6502/v1/".to_string();
+    let dirpath: String = "../65x02/nes6502/v1/".to_string();
     let mut testcase: String = "00".to_string();
     match env::var("TESTCASE") {
         Ok(v) => {testcase = v},

@@ -124,37 +124,43 @@ impl CPU {
     pub fn fetch_byte(&mut self, addr: usize) -> u8 {
         self.cycle += 1;
         let byte = self.memory[addr];
+        self.pc = self.pc.wrapping_add(1);
         byte
     } 
+
+    // fetch the byte from the program counter
+    pub fn fetch_pc(&mut self) -> u8 {
+        let byte = self.fetch_byte(self.pc as usize);
+        byte
+    }
+
+    pub fn fetch_two(&mut self) -> u16 {
+        let lower = self.fetch_pc() as u16;
+        let upper = self.fetch_pc() as u16;
+        let value = lower + (upper << 8);
+        return value;
+    }
+
+    // returns opcode as a u8
+    pub fn fetch_opcode(&mut self) -> OpWrapper {
+        // let byte = self.memory[self.pc as usize];
+        // Need to change opcode fetch from u8 -> Opcode 
+        let byte = self.fetch_pc();
+        let cur: OpWrapper  = self.optable[byte as usize].clone();
+        if cur.inst == Inst::ILL {
+            println!("Illegal opcode");
+        } else {
+            self.pc = self.pc.wrapping_add(1);
+        }
+        cur 
+    }
 
     pub fn write_byte(&mut self, addr: usize, val: u8) {
         self.cycle += 1;
         self.memory[addr] = val;
     }
 
-
-    // returns opcode as a u8
-    pub fn fetch_opcode(&mut self) -> u8 {
-        // let byte = self.memory[self.pc as usize];
-        // Need to change opcode fetch from u8 -> Opcode 
-        let byte = self.fetch_byte(self.pc as usize);
-        let cur: Inst = self.optable[byte as usize].inst;
-        if cur == Inst::ILL {
-            println!("Illegal opcode");
-        } else {
-            self.pc = self.pc.wrapping_add(1);
-        }
-        byte 
-    }
-
-    pub fn fetch_two(&mut self) -> u16 {
-        let lower = self.fetch_opcode() as u16;
-        let upper = self.fetch_opcode() as u16;
-        let value = lower + (upper << 8);
-        return value;
-    }
-
-    
+        
     // All addressing mode functions should be returning some memory address to be used
     // Branch instructions are all relative so REL is not handled
     
@@ -187,14 +193,14 @@ impl CPU {
     * Returns reference to memory 
     */
     pub fn zpg(&mut self) -> usize {
-        return self.fetch_opcode() as usize;
+        return self.fetch_pc() as usize;
     }
 
     /* 
     * Zero Page, X addressing mode
     */
     pub fn zpx(&mut self) -> usize {
-        return self.fetch_opcode().wrapping_add( self.x as u8) as usize;
+        return self.fetch_pc().wrapping_add( self.x as u8) as usize;
     }
 
     /* 
@@ -202,7 +208,7 @@ impl CPU {
     */
     pub fn zpy(&mut self) -> usize {
         // TODO: check if page boundary has been crossed
-        return self.fetch_opcode().wrapping_add( self.y as u8) as usize;
+        return self.fetch_pc().wrapping_add( self.y as u8) as usize;
     }
 
     /*
@@ -211,7 +217,7 @@ impl CPU {
     * Returns a value from -128 -> 127 as usize
     */
     pub fn rel(&mut self) -> usize {
-        return self.fetch_opcode() as usize;
+        return self.fetch_pc() as usize;
     }
 
     /*
@@ -246,8 +252,8 @@ impl CPU {
     // The next byte afterwards is the upper byte of the jump address
     // TODO: check the pc count for this
     pub fn ind(&mut self) -> usize {
-        let lower = self.fetch_opcode() as u16;   
-        let upper = self.fetch_opcode() as u16;
+        let lower = self.fetch_pc() as u16;   
+        let upper = self.fetch_pc() as u16;
         let jmp_addr = lower + (upper << 8);
         return jmp_addr as usize;
     }
@@ -258,7 +264,7 @@ impl CPU {
     // TODO: add a test case that handles the edge case
     // need to fix this
     pub fn idx(&mut self) -> usize {
-        let zp_addr = self.fetch_opcode().wrapping_add(self.x);  // zero page addr
+        let zp_addr = self.fetch_pc().wrapping_add(self.x);  // zero page addr
         let lower = self.memory[ zp_addr as usize ] as u16;
         let upper = self.memory[ zp_addr.wrapping_add(0x1) as usize ] as u16;
         let addr = (upper << 0x8) + lower;
@@ -269,7 +275,7 @@ impl CPU {
     * https://stackoverflow.com/questions/46262435/indirect-y-indexed-addressing-mode-in-mos-6502
     */
     pub fn idy(&mut self) -> usize {
-        let zpg_addr = self.fetch_opcode();
+        let zpg_addr = self.fetch_pc();
         let mut lower = self.memory[ zpg_addr as usize ] as u16;
         let mut upper = self.memory[ zpg_addr.wrapping_add(0x01) as usize ] as u16; // wrapping add
         // for the next mem location to read the high byte
@@ -290,13 +296,13 @@ impl CPU {
         let idx = op;
         let addr_mode = self.optable[op as usize].addr_mode;
         match addr_mode {
-            a if a == AddrMode::IMM => self.imm(),
-            a if a == AddrMode::ACC => self.acc(),
+            a if a == AddrMode::IMM => self.imm(), // immediate
+            a if a == AddrMode::ACC => self.acc(), // accumulator
             a if a == AddrMode::ZPG => self.zpg(),
             a if a == AddrMode::ZPX => self.zpx(),
             a if a == AddrMode::ZPY => self.zpy(),
             a if a == AddrMode::REL => self.rel(),
-            a if a == AddrMode::ABS => self.abs(),
+            a if a == AddrMode::ABS => self.abs(), // absolute
             a if a == AddrMode::ABX => self.abx(),
             a if a == AddrMode::ABY => self.aby(),
             a if a == AddrMode::IDX => self.idx(),
@@ -305,9 +311,10 @@ impl CPU {
         }
     }
 
-    pub fn handle_dispatch(&mut self, op: u8) {
+    pub fn handle_dispatch(&mut self, opwrap: OpWrapper) {
 
-        let cur: Inst = self.optable[op as usize].inst;
+        let cur: Inst = opwrap.inst;
+        let op = opwrap.op as u8;
         // replace this with actual cycle modification
         // self.cycle_count += self.optable[op as usize].cycle as u64;
         match cur {
