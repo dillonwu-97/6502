@@ -1,7 +1,9 @@
 use serde_json::Value;
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashSet};
+use std::env;
 use std::fs::File;
-use std::io::BufReader;
+use std::io::{BufReader, Write};
+use std::path::Path;
 
 // Build the string to use 
 fn get_iters<C: FromIterator<String>>(ops: Value, fields: Vec<String>) -> C {
@@ -25,14 +27,16 @@ fn build_enum<I>(src: I, name: String) -> String
 where
     I: IntoIterator<Item = String>,
 {
-    let mut ret = format!("#[derive(Debug, PartialEq, Eq)]\npub enum {} {{\n", name);
+    let mut ret = format!("#[allow(non_camel_case_types)]\n#[derive(Debug, PartialEq, Eq, Clone)]\npub enum {} {{\n", name);
+    let mut h: HashSet<String> = HashSet::new();
 
     for (i, v) in src.into_iter().enumerate() {
-        ret.push_str(&format!("   {} = 0x{:02x}\n", v, i));
+        if !h.contains(&v) {
+            h.insert(v.clone());
+            ret.push_str(&format!("   {} = 0x{:02x},\n", v, i));
+        }
     }
-
     ret.push_str("}\n");
-    println!("{}", ret);
     ret
 }
 
@@ -45,31 +49,41 @@ where
     fn from(value: u8) -> Self {{\n\t\t\
     match value {{\n\t\t\t\
     ", name).to_string();
+    let mut h: HashSet<String> = HashSet::new();
     for (i,v) in src.into_iter().enumerate() {
-        ret.push_str(&format!("\t 0x{:02x} => {}::{}\n", i, name, v));
+        if !h.contains(&v) {
+            h.insert(v.clone());
+            ret.push_str(&format!("\t 0x{:02x} => {}::{},\n", i, name, v));
+        }
     }
+    ret.push_str("_ => panic!(\"Error for value {}\", value)");
     ret.push_str("\t\t}\n\t}\n}");
     ret
 }
 
-fn build_struct() -> String {
+fn build_op() -> String {
     "#[derive(Clone)]
-    pub struct OpWrapper {
+    pub struct Op {
         pub op: Opcode,
         pub inst: Inst,
         pub addr_mode: AddrMode,
         pub cycle: u8,
         pub pagex: bool,
-    }".to_string()
-
-  // {
-  //   "inst": "SLO",
-  //   "mode": "ABY",
-  //   "cycle_count": 7,
-  //   "opcode": "1B",
-  //   "pagex": false
-  // },
+    }\n
+    impl Op {
+        pub fn new(op: Opcode, inst: Inst, addr_mode: AddrMode, cycle: u8, pagex: bool) -> Self {
+            Self {
+                op: op,
+                inst: inst,
+                addr_mode: addr_mode,
+                cycle: cycle,
+                pagex: pagex 
+            }
+        }
+    }
+    ".to_string()
 }
+
 
 fn main() {
     // Tell cargo to rerun this build script if opcodes.txt changes
@@ -81,11 +95,44 @@ fn main() {
     let addr_modes: BTreeSet<String> = get_iters(ops.clone(), vec!["mode".to_string()]);
     let instructions: BTreeSet<String> = get_iters(ops.clone(), vec!["inst".to_string()]);
     let opcodes: Vec<String> = get_iters(ops.clone(), vec!["inst".to_string(), "mode".to_string()]);
-    _ = build_enum(addr_modes.clone(), "AddrMode".to_string());
-    _ = build_enum(instructions.clone(), "Inst".to_string());
-    // _ = build_enum(opcodes.clone(), "Opcode".to_string());
-    let a = build_impl(addr_modes, "AddrMode".to_string());
-    let b = build_impl(instructions, "Inst".to_string());
-    let c = build_impl(opcodes, "Opcode".to_string());
-    println!("{}",b);
+
+    let addr_enum = build_enum(addr_modes.clone(), "AddrMode".to_string());
+    let inst_enum = build_enum(instructions.clone(), "Inst".to_string());
+    let opcode_enum = build_enum(opcodes.clone(), "Opcode".to_string());
+    println!("{:?}", addr_modes);
+
+
+    let addr_impl = build_impl(addr_modes, "AddrMode".to_string());
+    let inst_impl = build_impl(instructions, "Inst".to_string());
+    let opcode_impl = build_impl(opcodes, "Opcode".to_string());
+    println!("{:?}", addr_impl);
+
+    let op_struct = build_op();
+
+    let to_write_arr: Vec<String> = vec![
+        addr_enum, inst_enum, opcode_enum,
+        addr_impl, inst_impl, opcode_impl,
+        op_struct
+    ];
+
+    let mut to_write: String = String::new();
+    for (_,v) in to_write_arr.into_iter().enumerate() {
+        to_write.push_str(&v); 
+        to_write.push_str("\n"); 
+
+    }
+
+    let out_dir = env::var("OUT_DIR").unwrap();
+    let dst_path = Path::new(&out_dir).join("opcodes.rs");
+    println!("{}", to_write);
+    let mut file = File::create(&dst_path).unwrap();
+    file.write_all(to_write.as_bytes());
+    println!("cargo:warning=The active OUT_DIR is: {}", out_dir);
+    
+
 }
+
+
+// Good reading:
+// https://stackoverflow.com/questions/73673613/what-is-the-difference-between-optionnone-in-rust-and-null-in-other-languages
+
