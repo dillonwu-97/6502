@@ -91,7 +91,7 @@ fn build_op() -> String {
 //  build struct using input
 fn build_op_vec(ops: Value) -> String {
       
-    let mut ret: String = "fn build_opcodes() -> Vec<Op> {let opcode_arr: Vec<Op> = vec![".to_string();
+    let mut ret: String = "pub fn build_opcodes() -> Vec<Op> {let opcode_arr: Vec<Op> = vec![".to_string();
     for (i,v) in ops.as_array().unwrap().iter().enumerate() {
         // let inst: String = v["inst"];
         println!("{:?}\n", v);
