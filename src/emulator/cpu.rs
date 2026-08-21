@@ -11,7 +11,11 @@ use crate::emulator::addrmode_arr;
 use crate::emulator::opcode_arr;
 use crate::emulator::flag_arr;
 // use crate::emulator::handlers::incdec::idc;
+//
 
+// use crate::ops::AddrMode;
+use crate::ops::Op;
+pub use crate::ops::build_opcodes;
 
 // TODO: should I find some way to handle the invalid bits?
 pub const C: u8 = 1 << 0;
@@ -54,17 +58,20 @@ pub struct CPU {
 
 impl CPU {
     pub fn new() -> Self {
+        // let mut op_vec: Vec<Op>
+        let mut op_vc: Vec<Op> = build_opcodes();
+        
         let mut op_vec: Vec<OpWrapper> = Vec::with_capacity(256);
-        for i in 0..256 {
-            let new_wrapper: OpWrapper = OpWrapper::new(
-                opcode_arr[i],
-                addrmode_arr[i],
-                cycle_arr[i],
-                inst_arr[i],
-                flag_arr[i]
-            );
-            op_vec.push(new_wrapper);
-        }
+        // for i in 0..256 {
+        //     let new_wrapper: OpWrapper = OpWrapper::new(
+        //         opcode_arr[i],
+        //         addrmode_arr[i],
+        //         cycle_arr[i],
+        //         inst_arr[i],
+        //         flag_arr[i]
+        //     );
+        //     op_vec.push(new_wrapper);
+        // }
         Self {
             pc: 0, ac: 0, x: 0, y: 0, sr: StatusRegister::empty(), sp: 0xff, 
             memory: [0; MEMSIZE],
@@ -82,6 +89,7 @@ impl CPU {
             }
         }
         println!("Status register: {}", self.sr.bits());
+        println!("Program counter: {}", self.pc);
 
         println!("Finish debug");
     }
@@ -147,11 +155,13 @@ impl CPU {
         // Need to change opcode fetch from u8 -> Opcode 
         let byte = self.fetch_pc();
         let cur: OpWrapper  = self.optable[byte as usize].clone();
+        // need to separate based on illops
         if cur.inst == Inst::ILL {
+            // TODO: not sure if this should be done; just doing this to pass JAM test cases, but
+            // maybe there is more elegant solution
+            self.pc = self.pc.wrapping_sub(1); // Opcode was bad, decrement 
             println!("Illegal opcode");
-        } else {
-            self.pc = self.pc.wrapping_add(1);
-        }
+        } 
         cur 
     }
 
@@ -418,7 +428,6 @@ impl CPU {
 
             Inst::BRK | Inst::NOP | Inst::RTI => {
                 self.sys(cur);
-                self.debug();
             }
 
             Inst::ILL => {

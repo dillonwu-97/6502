@@ -4,15 +4,12 @@ use crate::emulator::cpu::StatusRegister;
 
 impl CPU {
     pub fn sys(&mut self, inst: Inst) {
+
+        // increment pc again to skip signature / padding byte
         self.pc = self.pc.wrapping_add(1);
         println!("rust val: {}", self.pc);
         match inst {
 
-// The BRK instruction forces the generation of an interrupt request. The program counter and processor status are pushed on the stack then the IRQ interrupt vector at $FFFE/F is loaded into the PC and the break flag in the status set to one.
-            // load value from 0xfffe and 0xffff to pc as well instead of subtraction stuff
-
-// how does this work?
-// BRK instruction are fully executed before any interrupt. (On the NMOS version, if an interrupt occured while a BRK instruction was fetching the interupt vector, this would be overwritten and the interrupt executed, instead.) <-- what does "this" refer to?
             // push high byte first, then low byte since we READ low byte first
             Inst::BRK => {
                 // set break flag to 1 before pushing
