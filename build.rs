@@ -69,26 +69,53 @@ fn build_op() -> String {
         pub addr_mode: AddrMode,
         pub cycle: u8,
         pub pagex: bool,
+        pub opnum: u8,
     }\n
     impl Op {
-        pub fn new(op: Opcode, inst: Inst, addr_mode: AddrMode, cycle: u8, pagex: bool) -> Self {
+        pub fn new(op: Opcode, inst: Inst, addr_mode: AddrMode, cycle: u8, pagex: bool, opnum: u8) -> Self {
             Self {
                 op: op,
                 inst: inst,
                 addr_mode: addr_mode,
                 cycle: cycle,
-                pagex: pagex 
+                pagex: pagex, 
+                opnum: opnum
             }
         }
     }
     ".to_string()
 }
 
+// Build out the code for the vector
+// for each thing in the serde_json opcode file,
+//  build struct using input
+fn build_op_vec(ops: Value) -> String {
+      
+    let mut ret: String = "fn build_opcodes() -> Vec<Op> {let opcode_arr: Vec<Op> = vec![".to_string();
+    for (i,v) in ops.as_array().unwrap().iter().enumerate() {
+        // let inst: String = v["inst"];
+        println!("{:?}\n", v);
+        // println!("{}\n", i);
+        println!("{}", v["mode"]);
+        let new_struct = format!("Op {{ op: Opcode::{}_{}, inst: Inst::{}, addr_mode: AddrMode::{}, cycle: {}, pagex: {}, opnum: 0x{:x} }},", 
+            v["inst"].as_str().unwrap(), 
+            v["mode"].as_str().unwrap(), 
+            v["inst"].as_str().unwrap(), 
+            v["mode"].as_str().unwrap(), 
+            v["cycle_count"],
+            v["pagex"],
+            i);
+        ret.push_str(&new_struct);
+    }
+    ret.push_str("];assert!(opcode_arr.len() == 0xff);opcode_arr}");
+    ret
+}
+
 
 fn main() {
     // Tell cargo to rerun this build script if opcodes.txt changes
     // Put into fn 
-    let file = File::open("./opcodes.json").unwrap();
+    let file = File::open("./assets/opcodes.json").unwrap();
     let reader = BufReader::new(file);
     let ops: Value = serde_json::from_reader(reader).unwrap();
 
@@ -99,21 +126,23 @@ fn main() {
     let addr_enum = build_enum(addr_modes.clone(), "AddrMode".to_string());
     let inst_enum = build_enum(instructions.clone(), "Inst".to_string());
     let opcode_enum = build_enum(opcodes.clone(), "Opcode".to_string());
-    println!("{:?}", addr_modes);
+    // println!("{:?}", addr_modes);
 
 
     let addr_impl = build_impl(addr_modes, "AddrMode".to_string());
     let inst_impl = build_impl(instructions, "Inst".to_string());
     let opcode_impl = build_impl(opcodes, "Opcode".to_string());
-    println!("{:?}", addr_impl);
+    // println!("{:?}", addr_impl);
 
     let op_struct = build_op();
+    let op_vec = build_op_vec(ops.clone());
 
     let to_write_arr: Vec<String> = vec![
         addr_enum, inst_enum, opcode_enum,
         addr_impl, inst_impl, opcode_impl,
-        op_struct
+        op_struct, op_vec
     ];
+
 
     let mut to_write: String = String::new();
     for (_,v) in to_write_arr.into_iter().enumerate() {
@@ -121,6 +150,7 @@ fn main() {
         to_write.push_str("\n"); 
 
     }
+
 
     let out_dir = env::var("OUT_DIR").unwrap();
     let dst_path = Path::new(&out_dir).join("opcodes.rs");
